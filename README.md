@@ -28,11 +28,12 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Pi_Package-PiRanha-00b894?style=for-the-badge" alt="Pi Package" />
+  <img src="https://img.shields.io/badge/CLI-piranha-00b894?style=for-the-badge" alt="piranha CLI" />
   <img src="https://img.shields.io/badge/Agents-53-ff3b30?style=for-the-badge" alt="53 Agents" />
   <img src="https://img.shields.io/badge/Engagements-16-orange?style=for-the-badge" alt="16 Engagements" />
+  <img src="https://img.shields.io/badge/Workflows-8-e94560?style=for-the-badge" alt="8 Workflows" />
   <img src="https://img.shields.io/badge/Runtime-Bun%20%2B%20TypeScript-black?style=for-the-badge&logo=bun" alt="Bun + TypeScript" />
-  <img src="https://img.shields.io/badge/Harness-Pi%20%2B%20Claude%20Code-blueviolet?style=for-the-badge" alt="Pi + Claude Code" />
+  <img src="https://img.shields.io/badge/Harness-omp%20%C2%B7%20pi%20%C2%B7%20Claude%20Code-blueviolet?style=for-the-badge" alt="omp · pi · Claude Code" />
   <img src="https://img.shields.io/badge/License-MIT-3fb950?style=for-the-badge" alt="MIT License" />
 </p>
 
@@ -143,20 +144,20 @@ Manage the package with `pi list`, `pi update piranha`, and `pi remove piranha`.
 
 ## What is PiRanha?
 
-**PiRanha** is an **autonomous bug-bounty swarm** that turns [Pi](https://pi.dev) (or [Claude Code](https://docs.anthropic.com/en/docs/claude-code)) into an elite security team. It combines 53 specialized vulnerability agents, a deterministic engagement router, 51 skills, 13 expert AI agents, and a full offensive-security toolchain behind a single command:
+**PiRanha** is an **autonomous bug-bounty swarm**. The `piranha` binary classifies a target, initializes a phase-tracked state machine, computes a deterministic agent deployment plan, then launches a *school* of **53 specialized vulnerability agents** inside a coding-agent harness (omp / pi or Claude Code) — each agent hunting one vuln class in parallel.
 
-```bash
-# That's it. One command. Autonomous hunting.
-hunt https://app.example.com
+```sh
+# One command. Autonomous hunting.
+piranha hunt https://app.example.com
 ```
 
 **What happens next:**
-1. A state machine initializes and tracks 10 phases of the hunt
-2. Credentials are loaded from an encrypted vault (never inline)
-3. The app is profiled — flows mapped, tech stack fingerprinted, trust boundaries identified
-4. Hypothesis-driven agents deploy in parallel — each with a specific attack theory
-5. Findings are reported in real-time with CVSS scoring
-6. A professional bug bounty report is generated automatically
+1. The target is classified into one of 16 engagement types and the matching workflow loads
+2. A state machine initializes and tracks the 10 phases of the hunt (`piranha status` / `--resume` anytime)
+3. Credentials are loaded from an encrypted vault (never inline)
+4. The app is profiled — flows mapped, tech stack fingerprinted, trust boundaries identified
+5. Hypothesis-driven agents deploy in parallel — each with a specific attack theory
+6. Findings are validated, deduped, chained, and CVSS-scored — then a bug-bounty report is generated
 
 ---
 
@@ -168,130 +169,32 @@ hunt https://app.example.com
 | Forget where you left off between sessions | State machine checkpoints every phase — `--resume` anytime |
 | Credentials in plaintext notes | Encrypted vault with 1Password integration |
 | Run same tools blindly on every target | Hypothesis-driven: agents attack WHERE the AppProfile says bugs live |
-| Test one thing at a time | 5 agents run in parallel, findings shared in real-time |
+| Test one thing at a time | Dozens of agents run in parallel per phase, findings shared in real-time |
 | Miss AI/LLM vulnerabilities | Dedicated LLMSecurityAgent (OWASP LLM Top 10) + AIAgentExploitationAgent (tool-calling / MCP / agentic) |
 | Medium findings silently dropped | Mediums archived for attack chain correlation |
 | No memory between hunts | Cross-session learning — gets smarter with every engagement |
-| Single tool / single domain | 51 skills covering web, mobile, API, cloud, network, binary, AI |
+| Single tool / single domain | 53 agents across 16 engagement types — web, API, LLM, mobile, cloud, network, binary |
 
 ---
 
-## The Full Stack: PAI + Superpowers + PiRanha
+## What's in the box
 
-PiRanha is more than a skill — it plugs into a **complete offensive-security infrastructure**. Here's what you get with the full setup:
+The `piranha` binary and the `BugBountyFramework` swarm skill ship together in this repo:
 
-### PAI (Personal AI Infrastructure) v3.0
+| Component | Count | What |
+|---|---|---|
+| **`piranha` binary** | 1 | Standalone launcher — classify, plan, state, vault, launch (compiled with `bun build --compile`) |
+| **Specialized agents** | 53 | 51 hunters/specialists + ValidatorAgent + ExploitChainAgent |
+| **Engagement types** | 16 | web, api, llm, android, ios, mobile, binary, firmware, thick-client, cloud (+aws/azure/gcp), kubernetes, network, recon |
+| **Workflows** | 8 | W_HUNT_WEB / API / LLM / MOBILE / NETWORK / CLOUD / THICK_CLIENT + W_RECON |
+| **Bun tools** | 7 | orchestrator, agent-router, credential-vault, auth-manager, burp-bridge, browser & appium harnesses |
+| **Report templates** | 2 | BugReport.md, TargetConfig.md |
 
-The foundation layer. PAI is a general problem-solving system that provides:
+The state machine, deterministic router, encrypted vault, hunt modes, and live dashboard are all driven through the binary or the skill. No external service is required to classify a target, compute a plan, or track hunt state.
 
-- **The Algorithm (v1.5.0)** — 7-phase structured reasoning (OBSERVE → THINK → PLAN → BUILD → EXECUTE → VERIFY → LEARN)
-- **51 Skills** — Specialized capabilities from security to content creation
-- **13 Expert Agents** — Architect, Engineer, Pentester, Researcher variants, QA Tester, and more
-- **20 Lifecycle Hooks** — Automated security validation, session management, algorithm tracking
-- **Cross-Session Memory** — Persistent learning across conversations
-- **Voice System** — ElevenLabs TTS integration with custom AI personality
-- **Multi-Channel Notifications** — ntfy, Discord, Twilio alerts for long tasks and findings
+### Optional: the full PAI environment
 
-### Superpowers Plugin
-
-Claude Code's official `superpowers` plugin adds enhanced capabilities:
-
-- Extended tool access and MCP server integration
-- Advanced agent orchestration with team mode
-- Enhanced permission management
-
-### Security Skill Stack (16 Skills)
-
-| Skill | Coverage |
-|-------|----------|
-| **BugBountyFramework** | Autonomous 10-phase hunt orchestration |
-| **WebAssessment** | OWASP WSTG v5, OWASP Top 10 |
-| **SecurityHub** | Master security command center with intelligent skill routing |
-| **OffensiveSecurityOrchestrator** | Kill chain tracking, adaptive methodology |
-| **APISecurityTesting** | REST, GraphQL, gRPC, BOLA, BFLA, mass assignment |
-| **MobileSecurity** | OWASP MASTG v2, Frida, Objection, MobSF |
-| **NetworkSecurity** | AD attacks, BloodHound, Kerberoasting, pivoting |
-| **CloudSecurity** | AWS/Azure/GCP, IAM escalation, Pacu, ScoutSuite |
-| **ExploitDev** | Heap exploitation, ROP chains, safe-linking bypass |
-| **ReverseEngineering** | Ghidra, radare2, binary analysis |
-| **MalwareAnalysis** | Static/dynamic analysis, YARA, IOC extraction |
-| **PromptInjection** | OWASP LLM Top 10, MITRE ATLAS |
-| **VulnResearch** | CVE development, AFL++ fuzzing, CodeQL |
-| **SASTOrchestration** | Semgrep, CodeQL, custom rules, taint tracking |
-| **SCASecurity** | SBOM, supply chain, dependency confusion |
-| **ThreatModeling** | STRIDE, PASTA, attack trees |
-| **Recon** | Subdomain enum, asset discovery, Shodan |
-| **RedTeam** | 32-agent adversarial analysis |
-
-### Expert Agent Army (13 Agents)
-
-| Agent | Specialty |
-|-------|-----------|
-| **Pentester** | Offensive security specialist — vulnerability assessment, exploitation |
-| **Engineer** | Elite principal engineer — TDD, strategic planning |
-| **Architect** | System design — constitutional principles, feature specs |
-| **Algorithm** | PAI Algorithm expert — ISC creation and evolution |
-| **Designer** | UX/UI specialist — Figma, shadcn/ui |
-| **Artist** | Visual content — Flux, GPT-Image-1, prompt engineering |
-| **QATester** | Browser-automation validation — Gate 4 completion gates |
-| **Intern** | 176-IQ generalist — multi-faceted problem solving |
-| **ClaudeResearcher** | Multi-query academic research via Claude WebSearch |
-| **CodexResearcher** | Technical archaeology — O3, GPT-5-Codex consultation |
-| **GeminiResearcher** | Multi-perspective research via Google Gemini |
-| **GrokResearcher** | Contrarian analysis via xAI Grok |
-| **PerplexityResearcher** | Investigative journalism via Perplexity |
-
-### MCP Servers (3 Core + 5 Recommended)
-
-**Core (Pre-configured):**
-| Server | Purpose |
-|--------|---------|
-| **Burp Suite MCP** | Proxy traffic analysis, scope sync, Collaborator, HAR export |
-| **Filesystem MCP** | Direct file system access |
-| **GitHub MCP** | Repository operations, PR management |
-
-**Recommended Security MCPs:**
-| Server | Purpose | Install |
-|--------|---------|---------|
-| **Shodan** | Internet asset search | `npm install -g @shodan/mcp-server` |
-| **VirusTotal** | Malware/IOC analysis | `npx -y @virustotal/mcp-server` |
-| **CVE/NVD** | Vulnerability database | Custom Python server |
-| **Nuclei** | Vulnerability scanning | Custom Node server |
-| **GitHub Security Advisory** | CVE tracking | Via GitHub MCP |
-
-### Plugins (4 Active)
-
-| Plugin | Purpose |
-|--------|---------|
-| **superpowers** | Enhanced Claude Code capabilities |
-| **claude-mem** | Persistent cross-session memory |
-| **swift-lsp** | Swift language server protocol |
-| **ui-ux-pro-max** | Advanced UI/UX design capabilities |
-
-### Lifecycle Hooks (20 Hooks)
-
-| Hook | Trigger | Purpose |
-|------|---------|---------|
-| **SecurityValidator** | Pre: Bash, Edit, Write, Read | Validates all tool calls for security |
-| **VoiceGate** | Pre: Bash | Voice notification gate |
-| **AgentExecutionGuard** | Pre: Task | Guards agent execution |
-| **SkillGuard** | Pre: Skill | Validates skill invocations |
-| **SetQuestionTab** | Pre: AskUserQuestion | Terminal tab management |
-| **AlgorithmTracker** | Post: Bash, Task* | Tracks algorithm phase progression |
-| **QuestionAnswered** | Post: AskUserQuestion | Tracks Q&A flow |
-| **WorkCompletionLearning** | SessionEnd | Captures learnings from work |
-| **SessionSummary** | SessionEnd | Generates session summaries |
-| **RelationshipMemory** | SessionEnd | Builds relationship context |
-| **UpdateCounts** | SessionEnd | Updates system statistics |
-| **IntegrityCheck** | SessionEnd | Validates system integrity |
-| **RatingCapture** | UserPromptSubmit | Captures quality ratings |
-| **AutoWorkCreation** | UserPromptSubmit | Auto-creates work tracking |
-| **UpdateTabTitle** | UserPromptSubmit | Dynamic terminal tab titles |
-| **SessionAutoName** | UserPromptSubmit | Auto-names sessions |
-| **StartupGreeting** | SessionStart | Displays PAI banner |
-| **LoadContext** | SessionStart | Loads session context |
-| **CheckVersion** | SessionStart | Version checks |
-| **StopOrchestrator** | Stop | Clean shutdown handling |
+PiRanha was built inside — and plugs into — a larger offensive-security setup: [PAI](https://github.com/danielmiessler/PAI) (the Algorithm, cross-session memory, a wider security-skill stack, expert agents, lifecycle hooks), the Claude Code `superpowers` plugin, and MCP servers (Burp Suite, Shodan, VirusTotal, …). **None of it is required to run a hunt** — it's an optional power-up. The complete, step-by-step replication guide lives in **[SETUP.md](SETUP.md)**.
 
 ---
 
@@ -299,105 +202,71 @@ Claude Code's official `superpowers` plugin adds enhanced capabilities:
 
 ```mermaid
 flowchart TB
-    subgraph Input["User Input"]
-        A["hunt target.com"]
-        B["hunt --config target.json"]
-        C["hunt --apk app.apk"]
-    end
-
-    subgraph PAI["PAI Infrastructure (v3.0)"]
+    subgraph CLI["piranha binary"]
         direction TB
-        ALG["The Algorithm (7 phases)"]
-        SK["51 Skills"]
-        HK["20 Hooks"]
-        MEM["Cross-Session Memory"]
-        VOICE["Voice System"]
+        IN["piranha hunt &lt;target&gt;"]
+        CLS["classify &rarr; engagement"]
+        ST["init state machine"]
+        PL["compute agent plan"]
+        LA["launch harness"]
+        IN --> CLS --> ST --> PL --> LA
     end
 
-    subgraph Orchestrator["Hunt Orchestrator (State Machine)"]
+    subgraph Harness["Coding-agent harness (omp / pi / Claude Code)"]
         direction TB
-        P0["Phase 0: INIT"]
-        P1["Phase 1: MEMORY_LOAD"]
-        P2["Phase 2: TARGET_INGEST"]
-        P3["Phase 3: APP_UNDERSTANDING"]
-        P4["Phase 4: RECON"]
-        P5["Phase 5: AGENT_DEPLOY"]
-        P6["Phase 6: DYNAMIC_TEST"]
-        P7["Phase 7: VULN_ASSESS"]
-        P8["Phase 8: LEARNING"]
-        P9["Phase 9: REPORT"]
-
-        P0 --> P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8 --> P9
+        ORC["Hunt Orchestrator — 10-phase state machine"]
+        RT["Engagement Router (agent-router.ts)"]
+        ORC --> RT
     end
 
-    subgraph Tools["Tool Layer"]
+    subgraph Swarm["Agent swarm (parallel, concurrency-capped)"]
+        direction LR
+        AG1["AppReviewAgent"]
+        AG2["XSSAgent"]
+        AG3["SQLiAgent"]
+        AG4["SSRFAgent"]
+        AG5["LLMSecurityAgent"]
+        AG6["…48 more"]
+    end
+
+    subgraph Meta["Validate & chain"]
+        VAL["ValidatorAgent — reproduce, de-dup, CVSS"]
+        CHN["ExploitChainAgent — kill-chain correlation"]
+        VAL --> CHN
+    end
+
+    subgraph Tools["Tool layer"]
         V["Credential Vault"]
         AU["Auth Manager"]
         BB["Burp Bridge"]
-        PW["Playwright Harness"]
+        PW["Browser Harness"]
         AP["Appium Harness"]
     end
 
-    subgraph MCPs["MCP Servers"]
-        BURP["Burp Suite MCP"]
-        FS["Filesystem MCP"]
-        GH["GitHub MCP"]
-        SH["Shodan MCP"]
-        VT["VirusTotal MCP"]
+    subgraph Out["Output"]
+        F["Real-time findings"]
+        D["Live dashboard (piranha status)"]
+        R["Bug-bounty report"]
     end
 
-    subgraph Agents["Agent Army (Parallel)"]
-        direction LR
-        AG1["XSSAgent"]
-        AG2["SQLiAgent"]
-        AG3["SSRFAgent"]
-        AG4["IDORAgent"]
-        AG5["AuthAgent"]
-        AG6["LLMSecurityAgent"]
-        AG7["APIAgent"]
-        AG8["MobileAgent"]
-        AG9["...12 more"]
-    end
+    LA --> ORC
+    RT --> Swarm
+    Swarm --> Meta
+    ST -.-> V
+    ORC --> AU
+    Swarm --> BB
+    Swarm --> PW
+    Swarm --> AP
+    Meta --> F
+    ORC --> D
+    Meta --> R
 
-    subgraph SecuritySkills["Security Skills (16)"]
-        direction LR
-        SS1["WebAssessment"]
-        SS2["SecurityHub"]
-        SS3["APISecurityTesting"]
-        SS4["PromptInjection"]
-        SS5["...12 more"]
-    end
-
-    subgraph Output["Output"]
-        R["Bug Bounty Report"]
-        F["Real-time Findings"]
-        D["Live Dashboard"]
-        N["Notifications (ntfy/Discord/SMS)"]
-    end
-
-    Input --> PAI
-    PAI --> Orchestrator
-    P2 --> V
-    P3 --> AU
-    P3 --> BB
-    P4 --> SecuritySkills
-    P5 --> Agents
-    P6 --> PW
-    P6 --> AP
-    Agents --> MCPs
-    Agents --> F
-    P9 --> R
-    Orchestrator --> D
-    F --> N
-
-    style PAI fill:#1e3a5f,stroke:#3b82f6,color:#fff
-    style Orchestrator fill:#1a1a2e,stroke:#e94560,color:#fff
-    style Agents fill:#0f3460,stroke:#e94560,color:#fff
+    style CLI fill:#1a1a2e,stroke:#00b894,color:#fff
+    style Harness fill:#1e3a5f,stroke:#3b82f6,color:#fff
+    style Swarm fill:#0f3460,stroke:#e94560,color:#fff
+    style Meta fill:#2d1b69,stroke:#8b5cf6,color:#fff
     style Tools fill:#16213e,stroke:#0f3460,color:#fff
-    style MCPs fill:#1a1a3e,stroke:#00d2ff,color:#fff
-    style SecuritySkills fill:#2d1b69,stroke:#8b5cf6,color:#fff
-    style Input fill:#533483,stroke:#e94560,color:#fff
-    style Output fill:#0f3460,stroke:#00d2ff,color:#fff
+    style Out fill:#0f3460,stroke:#00d2ff,color:#fff
 ```
 
 ---
@@ -449,9 +318,9 @@ See **[SETUP.md](SETUP.md)** for the complete, step-by-step guide to replicate t
 | `comprehensive` | >= 0.0 | 50 | Full security audits — everything documented |
 
 ```bash
-hunt https://target.com                       # bounty mode (default)
-hunt https://target.com --mode pentest        # pentest mode
-hunt https://target.com --mode comprehensive  # comprehensive mode
+piranha hunt https://target.com                       # bounty mode (default)
+piranha hunt https://target.com --mode pentest        # pentest mode
+piranha hunt https://target.com --mode comprehensive  # comprehensive mode
 ```
 
 ---
@@ -549,7 +418,7 @@ The hunt orchestrator classifies your target and dispatches the appropriate work
 ### How Workflows Work
 
 ```
-hunt https://target.com
+piranha hunt https://target.com
   │
   ├── Orchestrator classifies target type
   ├── Loads W_HUNT_WEB workflow
@@ -586,56 +455,50 @@ Each phase has **gate conditions** — the workflow only advances when the gate 
 
 ### Your First Hunt
 
-```
-hunt https://app.example.com
+```sh
+piranha hunt https://app.example.com
 ```
 
 ### Hunt with Stored Credentials
 
-```
-Store credentials for example-corp: username admin@test.com, password SecureP@ss123
-
-hunt https://app.example.com --creds vault:example-corp
+```sh
+piranha vault --store --target example-corp --username admin@test.com --password 'SecureP@ss123'
+piranha hunt https://app.example.com --creds vault:example-corp
 ```
 
 ### Pentest Mode (Find More)
 
-```
-hunt https://staging.example.com --mode pentest
+```sh
+piranha hunt https://staging.example.com --mode pentest
 ```
 
 ### Hunt an AI Application
 
+```sh
+piranha hunt https://ai-chatbot.example.com --mode pentest
 ```
-hunt https://ai-chatbot.example.com --mode pentest
 
-Focus on AI-specific vulnerabilities:
-- Extract the system prompt
-- Test cross-user data access
-- Try prompt injection (direct and indirect)
-- Test RAG poisoning via document upload
-```
+Then steer the LLM track inside your harness: extract the system prompt, test cross-user data access, try direct + indirect prompt injection, and probe RAG poisoning via document upload.
 
 ### Resume a Hunt
 
-```
-hunt https://app.example.com --resume
+```sh
+piranha hunt https://app.example.com --resume
 ```
 
 ### Full Power Hunt
 
+```sh
+piranha hunt https://app.example.com --creds vault:example-corp --mode comprehensive
 ```
-hunt https://app.example.com using username test@example.com and password TestPass123
 
-Use all available tools, skills, workflows, and MCPs.
-Use Playwright and Burp MCPs to perform dynamic analysis.
-Map the entire application attack surface.
-Understand the application before attacking.
-Find 10 high-severity vulnerabilities.
-Don't stop until done.
-```
+Then steer it hard inside the harness:
+
+> Map the entire application attack surface. Understand the application before attacking. Use every available tool, skill, and MCP — drive Burp and the browser harness for dynamic analysis. Find 10 high-severity vulnerabilities. Don't stop until done.
 
 ### Use Security Skills Directly
+
+> These slash-commands belong to the **optional** full PAI security-skill stack ([SETUP.md](SETUP.md)) — they are not bundled with the `piranha` binary or the Pi package.
 
 ```
 # Run a web assessment using the WebAssessment skill
@@ -659,8 +522,8 @@ See [examples/sample-prompts.md](examples/sample-prompts.md) for more.
 
 Check hunt progress anytime:
 
-```
-hunt https://target.com --status
+```sh
+piranha status https://target.com
 ```
 
 ```
@@ -692,101 +555,30 @@ hunt https://target.com --status
 ## Directory Structure
 
 ```
-# PiRanha skill (installed to ~/.claude/skills/)
-~/.claude/skills/BugBountyFramework/
-├── SKILL.md                     # Main skill definition (v2.0)
-├── Agents/                      # 53 specialized agents (51 hunters/specialists + ValidatorAgent + ExploitChainAgent)
-│   ├── AppReviewAgent.md
-│   ├── LLMSecurityAgent.md
-│   ├── XSSAgent.md
-│   ├── SQLiAgent.md
-│   ├── SSRFAgent.md
-│   ├── IDORAgent.md
-│   ├── AuthAgent.md
-│   ├── APIAgent.md
-│   ├── CORSAgent.md
-│   ├── FileUploadAgent.md
-│   ├── XXEAgent.md
-│   ├── RCEAgent.md
-│   ├── BusinessLogicAgent.md
-│   ├── MobileAgent.md
-│   ├── WindowsAgent.md
-│   ├── ReconAgent.md
-│   ├── ReverseEngineeringAgent.md
-│   ├── ExploitDevAgent.md
-│   ├── DesktopAppAgent.md
-│   ├── LLMAgent.md             # (legacy — superseded by LLMSecurityAgent)
-│   └── ...                     # + 33 more specialist agents (full list in SKILL.md -> Agents Reference)
-├── Tools/                       # TypeScript tools (Bun runtime)
-│   ├── hunt-orchestrator.ts
-│   ├── agent-router.ts          # engagement type -> ordered agent deployment plan
-│   ├── credential-vault.ts
-│   ├── auth-manager.ts
-│   ├── burp-bridge.ts
-│   ├── playwright-harness.ts
-│   └── appium-harness.ts
-├── Templates/
-│   ├── BugReport.md
-│   └── TargetConfig.md
-└── Wordlists/
+# This repo — the PiRanha package
+PiRanha/
+├── cli/
+│   └── piranha.ts                 # the `piranha` launcher binary (bun build --compile)
+├── skills/
+│   └── BugBountyFramework/        # the swarm skill (installs under the name `piranha`)
+│       ├── SKILL.md               # 10-phase hunt orchestration
+│       ├── Agents/                # 53 agents (51 hunters + ValidatorAgent + ExploitChainAgent)
+│       ├── Workflows/             # 8 engagement workflows (W_HUNT_WEB, W_HUNT_API, ...)
+│       ├── Tools/                 # 7 Bun tools (orchestrator, router, vault, auth, burp, browser, appium)
+│       ├── Templates/             # BugReport.md, TargetConfig.md
+│       └── Wordlists/
+├── install.sh                     # macOS/Linux installer (prebuilt binary or bun source)
+├── install.ps1                    # Windows installer
+├── examples/                      # sample prompts + target config
+└── .github/workflows/release.yml  # cross-platform binary release on tag
 
-# PAI Infrastructure (the foundation)
-~/.claude/
-├── settings.json                # Central config (identity, hooks, permissions, plugins)
-├── CLAUDE.md                    # Entry point
-├── .mcp.json                    # MCP server configuration
-├── skills/                      # 51 skills
-│   ├── PAI/                     # Core PAI system
-│   ├── BugBountyFramework/      # This project
-│   ├── WebAssessment/           # OWASP WSTG v5
-│   ├── SecurityHub/             # Security command center
-│   ├── OffensiveSecurityOrchestrator/
-│   ├── APISecurityTesting/
-│   ├── MobileSecurity/
-│   ├── NetworkSecurity/
-│   ├── CloudSecurity/
-│   ├── ExploitDev/
-│   ├── ReverseEngineering/
-│   ├── MalwareAnalysis/
-│   ├── PromptInjection/
-│   ├── VulnResearch/
-│   ├── SASTOrchestration/
-│   ├── SCASecurity/
-│   ├── ThreatModeling/
-│   ├── Recon/
-│   ├── RedTeam/
-│   ├── OSINT/
-│   ├── Research/                # Multi-engine research
-│   ├── Browser/                 # Browser automation
-│   ├── Fabric/                  # 240+ prompt patterns
-│   └── ...35 more
-├── agents/                      # 13 expert agent definitions
-│   ├── Pentester.md
-│   ├── Engineer.md
-│   ├── Architect.md
-│   └── ...10 more
-├── hooks/                       # 20 lifecycle hooks
-│   ├── SecurityValidator.hook.ts
-│   ├── AlgorithmTracker.hook.ts
-│   ├── LoadContext.hook.ts
-│   ├── handlers/                # 7 hook handlers
-│   └── lib/                     # 12 shared libraries
-├── mcps/                        # Custom MCP servers
-│   └── burp-mcp/
-├── VoiceServer/                 # ElevenLabs TTS integration
-└── MEMORY/                      # Persistent memory system
-    ├── BugBounty/
-    │   ├── Sessions/
-    │   ├── Findings/
-    │   ├── PatternDB/
-    │   ├── LearningLogs/
-    │   ├── TargetProfiles/
-    │   └── Vault/
-    ├── LEARNING/
-    ├── SECURITY/
-    ├── STATE/
-    ├── WORK/
-    └── VOICE/
+# Installed state (created on install / first run)
+~/.local/bin/piranha               # the binary (or via `bun install -g`)
+~/.claude/skills/BugBountyFramework/   # skill copy, for Claude Code (`piranha install`)
+~/.claude/MEMORY/BugBounty/
+├── Sessions/                      # per-hunt state machine + event log (--resume)
+├── Findings/  PatternDB/  LearningLogs/  TargetProfiles/
+└── Vault/                         # encrypted credential vault
 ```
 
 ---
@@ -799,12 +591,12 @@ hunt https://target.com --status
 | **Context** | Remembers across sessions | Stateless | Notes/memory |
 | **Hypothesis-driven** | Tests specific theories | Tests everything | Depends on researcher |
 | **AI/LLM testing** | First-class OWASP LLM Top 10 | Not supported | Rare expertise |
-| **Parallel agents** | 5 specialized agents simultaneously | Single scanner | One person |
+| **Parallel agents** | Up to ~24 agents per phase, concurrency-capped | Single scanner | One person |
 | **State machine** | Checkpoints, resume, never loses progress | Run from scratch | Bookmarks/notes |
 | **Credential security** | Encrypted vault + 1Password | Config files | Plaintext notes |
 | **Multi-domain** | Web + Mobile + API + Cloud + Network + Binary | Single domain | Limited scope |
-| **Algorithm** | 7-phase structured reasoning (PAI) | None | Informal methodology |
-| **Skills ecosystem** | 51 skills, 16 security-focused | Plugin-based | Tool-dependent |
+| **Engagement routing** | Deterministic router maps target → ordered agent plan | Fixed templates | Manual tool choice |
+| **Coverage** | 53 agents across 16 engagement types | Plugin-based | Tool-dependent |
 
 ---
 
@@ -847,20 +639,20 @@ MIT License. See [LICENSE](LICENSE) for details.
 ## Acknowledgements
 
 - **[Anthropic](https://anthropic.com)** — Claude Code, the AI engine behind everything
-- **[Daniel Miessler / PAI](https://github.com/danielmiessler/PAI)** — Personal AI Infrastructure v3.0 — the foundation layer providing the Algorithm (v1.5.0), 51 skills, 13 expert agents, 20 lifecycle hooks, cross-session memory, and the structured reasoning framework that makes autonomous hunting possible
+- **[Daniel Miessler / PAI](https://github.com/danielmiessler/PAI)** — the Personal AI Infrastructure that inspired the orchestration model and powers the optional full security-skill environment (see [SETUP.md](SETUP.md))
 - **[Claude Code Superpowers](https://github.com/anthropics/claude-code)** — Official Claude Code plugin enabling enhanced tool access, advanced agent orchestration with team mode, and extended MCP server integration that powers parallel agent deployment
 - **[claude-mem](https://github.com/thedotmack/claude-mem)** — Persistent cross-session memory plugin that powers PiRanha's learning system — remembering techniques, patterns, and findings across hunts
 - **[PortSwigger](https://portswigger.net)** — Burp Suite integration via custom MCP bridge
 - **[ProjectDiscovery](https://projectdiscovery.io)** — Nuclei, httpx, subfinder, naabu — the recon backbone
 - **[Playwright](https://playwright.dev)** — Browser automation for dynamic testing and app profiling
-- **[Bun](https://bun.sh)** — TypeScript runtime powering all tools and hooks
+- **[Bun](https://bun.sh)** — the TypeScript runtime that compiles the `piranha` binary and powers every tool
 - **[ElevenLabs](https://elevenlabs.io)** — Voice synthesis for the PAI notification and voice system
 - **[ntfy](https://ntfy.sh)** — Push notifications for long-running hunts
 
 ---
 
 <p align="center">
-  <strong>Built with Claude Code + PAI by <a href="https://github.com/h4ckologic">h4ckologic</a></strong>
+  <strong>Built on Pi / omp + Claude Code by <a href="https://github.com/h4ckologic">h4ckologic</a></strong>
 </p>
 
 <p align="center">
