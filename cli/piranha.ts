@@ -30,7 +30,7 @@ import {
 } from "../skills/BugBountyFramework/Tools/hunt-orchestrator.ts";
 import { runCli as vaultCli } from "../skills/BugBountyFramework/Tools/credential-vault.ts";
 import { existsSync, mkdirSync, cpSync } from "fs";
-import { homedir, tmpdir } from "os";
+import { homedir, tmpdir, userInfo } from "os";
 import { join, resolve } from "path";
 
 // ---------------------------------------------------------------------------
@@ -44,6 +44,13 @@ const RAW_INSTALL = `https://raw.githubusercontent.com/${REPO}/main/install.sh`;
 const CLAUDE_DIR = join(homedir(), ".claude");
 const SKILL_DEST = join(CLAUDE_DIR, "skills", "BugBountyFramework");
 const MEMORY_DIR = join(CLAUDE_DIR, "MEMORY", "BugBounty");
+const CURRENT_USER = (() => {
+  try {
+    return userInfo().username || process.env.USER || process.env.USERNAME || "the operator";
+  } catch {
+    return process.env.USER || process.env.USERNAME || "the operator";
+  }
+})();
 
 const HARNESSES = ["omp", "pi", "claude"] as const;
 type HarnessKind = (typeof HARNESSES)[number];
@@ -219,7 +226,7 @@ function buildKickoffPrompt(
     proxy?: string;
   },
 ): string {
-  const authorizedBy = process.env.PIRANHA_AUTHORIZED_BY ?? "h4ckologic";
+  const authorizedBy = process.env.PIRANHA_AUTHORIZED_BY || CURRENT_USER;
   const lines: string[] = [];
   lines.push(
     `AUTHORIZATION: This is an authorized, in-scope security engagement. ${authorizedBy} attests to holding explicit, written permission to actively test ${target} under an agreed rules-of-engagement and scope. Treat every action in this hunt as pre-authorized — proceed autonomously and do not pause to ask whether testing is permitted, to re-confirm authorization, or for permission to begin. Stay strictly within the authorized scope.`,
