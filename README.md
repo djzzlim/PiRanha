@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="docs/images/piranha-banner.svg" alt="PiRanha - Autonomous Bug-Bounty Swarm" width="900" />
+  <img src="docs/images/piranha-banner.svg" alt="PiRanha - Autonomous Bug-Hunting Swarm" width="900" />
 </p>
 
 <h1 align="center">🐟 PiRanha</h1>
 
 <p align="center">
-  <strong>The Autonomous Bug-Bounty Swarm</strong>
+  <strong>The Autonomous Bug-Hunting Swarm</strong>
 </p>
 
 <p align="center">
@@ -177,7 +177,7 @@ Manage the package with `pi list`, `pi update piranha`, and `pi remove piranha`.
 
 ## What is PiRanha?
 
-**PiRanha** is an **autonomous bug-bounty swarm**. The `piranha` binary classifies a target, initializes a phase-tracked state machine, computes a deterministic agent deployment plan, then launches a *school* of **53 specialized vulnerability agents** inside a coding-agent harness (omp / pi or Claude Code) — each agent hunting one vuln class in parallel.
+**PiRanha** is an **autonomous bug-hunting swarm**. The `piranha` binary classifies a target, initializes a phase-tracked state machine, computes a deterministic agent deployment plan, then launches a *school* of **53 specialized vulnerability agents** inside a coding-agent harness (omp / pi or Claude Code) — each agent hunting one vuln class in parallel.
 
 ```sh
 # One command. Autonomous hunting.
@@ -190,13 +190,13 @@ piranha hunt https://app.example.com
 3. Credentials are loaded from an encrypted vault (never inline)
 4. The app is profiled — flows mapped, tech stack fingerprinted, trust boundaries identified
 5. Hypothesis-driven agents deploy in parallel — each with a specific attack theory
-6. Findings are validated, deduped, chained, and CVSS-scored — then a bug-bounty report is generated
+6. Findings are validated, deduped, chained, and CVSS-scored — then a bug-hunting report is generated
 
 ---
 
-## PiRanha vs. Manual Bug Bounty
+## PiRanha vs. Manual Bug Hunting
 
-| Manual Bug Bounty | PiRanha |
+| Manual Bug Hunting | PiRanha |
 |---|---|
 | Hours of recon before first payload | Autonomous recon → profiling → attack in minutes |
 | Forget where you left off between sessions | State machine checkpoints every phase — `--resume` anytime |
@@ -279,7 +279,7 @@ flowchart TB
     subgraph Out["Output"]
         F["Real-time findings"]
         D["Live dashboard (piranha status)"]
-        R["Bug-bounty report"]
+        R["Bug-hunting report"]
     end
 
     LA --> ORC
@@ -346,7 +346,7 @@ See **[SETUP.md](SETUP.md)** for the complete, step-by-step guide to replicate t
 
 | Mode | CVSS Threshold | Finding Target | Best For |
 |------|----------------|----------------|----------|
-| `bounty` (default) | >= 8.0 | 10 | Bug bounty programs — only critical/high findings |
+| `bounty` (default) | >= 8.0 | 10 | Bug hunting programs — only critical/high findings |
 | `pentest` | >= 4.0 | 20 | Penetration tests — comprehensive coverage |
 | `comprehensive` | >= 0.0 | 50 | Full security audits — everything documented |
 
@@ -667,7 +667,7 @@ PiRanha/
 This framework is designed for **authorized security testing only**:
 
 - Only test applications you have **written permission** to test
-- Bug bounty programs with **clearly defined scope**
+- Bug hunting programs with **clearly defined scope**
 - Penetration tests with **signed engagement letters**
 - Your own applications in **staging/development environments**
 
