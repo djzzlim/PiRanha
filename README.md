@@ -439,14 +439,14 @@ The hunt orchestrator classifies your target and dispatches the appropriate work
 
 | Workflow | Trigger | Phases | Agents | Lines |
 |----------|---------|--------|--------|-------|
-| **W_HUNT_WEB** | Web application URL | 10 | 29 agents (parallel) | 2,018 |
-| **W_HUNT_API** | API endpoint / Swagger / GraphQL | 9 | 17 agents | 487 |
-| **W_HUNT_LLM** | AI/LLM app (chatbot, RAG, copilot) | 13 | 11 agents | 688 |
-| **W_HUNT_MOBILE** | APK / IPA file | 10 | 14 agents (Android + iOS tracks) | 1,037 |
-| **W_HUNT_NETWORK** | IP range / CIDR / AD target | 9 | 10 agents | 814 |
-| **W_HUNT_CLOUD** | AWS / Azure / GCP environment | 10 | 14 agents (per-provider) | 607 |
-| **W_HUNT_THICK_CLIENT** | Electron / .NET / Java / native | 10 | 12 agents | 874 |
-| **W_RECON** | Standalone recon request | 10 | 5 agents | 703 |
+| **W_HUNT_WEB** | Web application URL | 12 | 24 hunters (parallel) | 2,299 |
+| **W_HUNT_API** | API endpoint / Swagger / GraphQL | 13 | 15 agents | 1,558 |
+| **W_HUNT_LLM** | AI/LLM app (chatbot, RAG, copilot, agent) | 13 | 9 agents | 1,255 |
+| **W_HUNT_MOBILE** | APK / IPA file | 12 | 14 agents (Android + iOS tracks) | 1,461 |
+| **W_HUNT_NETWORK** | IP range / CIDR / AD target | 9 | 8 agents | 1,526 |
+| **W_HUNT_CLOUD** | AWS / Azure / GCP / k8s environment | 11 | 14 agents (per-provider) | 1,268 |
+| **W_HUNT_THICK_CLIENT** | Electron / .NET / Java / native | 11 | 12 agents | 1,482 |
+| **W_RECON** | Standalone recon request | 13 | 5 agents | 1,608 |
 
 ### How Workflows Work
 
