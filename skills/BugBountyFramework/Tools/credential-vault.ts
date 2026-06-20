@@ -24,7 +24,7 @@ import { join } from "path";
 // Types
 // ---------------------------------------------------------------------------
 
-interface Credential {
+export interface Credential {
   username?: string;
   password?: string;
   cookie?: string;
@@ -281,9 +281,9 @@ async function actionRedact(filePath: string): Promise<void> {
 // CLI entry point
 // ---------------------------------------------------------------------------
 
-async function main(): Promise<void> {
+export async function runCli(argv: string[] = Bun.argv.slice(2)): Promise<void> {
   const { values } = parseArgs({
-    args: Bun.argv.slice(2),
+    args: argv,
     options: {
       store: { type: "boolean", default: false },
       get: { type: "boolean", default: false },
@@ -359,7 +359,9 @@ Environment overrides: HUNT_USER, HUNT_PASS, HUNT_COOKIE, HUNT_API_KEY`);
   }
 }
 
-main().catch((err) => {
-  console.error(`[vault] Fatal: ${err.message}`);
-  process.exit(1);
-});
+if (import.meta.main) {
+  runCli().catch((err) => {
+    console.error(`[vault] Fatal: ${err.message}`);
+    process.exit(1);
+  });
+}

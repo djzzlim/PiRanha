@@ -27,17 +27,6 @@
 import { parseArgs } from "util";
 import { readdirSync } from "fs";
 
-const { values: args } = parseArgs({
-  args: Bun.argv.slice(2),
-  options: {
-    engagement: { type: "string" },   // engagement type or alias (see --list)
-    json: { type: "boolean", default: false },
-    validate: { type: "boolean", default: false },
-    list: { type: "boolean", default: false },
-    "max-parallel": { type: "string", default: "5" }, // concurrency cap hint
-  },
-});
-
 const AGENTS_DIR = `${import.meta.dir}/../Agents`;
 
 // A group of agents that run in parallel, after all earlier groups complete.
@@ -61,7 +50,7 @@ const META: AgentGroup[] = [
 ];
 
 // Engagement aliases → canonical key.
-const ALIASES: Record<string, string> = {
+export const ALIASES: Record<string, string> = {
   ai: "llm", chatbot: "llm", rag: "llm",
   apk: "android",
   ipa: "ios",
@@ -74,7 +63,7 @@ const ALIASES: Record<string, string> = {
 };
 
 // --- Single source of truth: engagement → ordered deployment groups ---
-const ENGAGEMENTS: Record<string, DeploymentPlan> = {
+export const ENGAGEMENTS: Record<string, DeploymentPlan> = {
   web: {
     engagement: "web",
     description: "Web application (HTTP/HTTPS URL)",
@@ -280,18 +269,18 @@ const ENGAGEMENTS: Record<string, DeploymentPlan> = {
 
 // --- Helpers ---
 
-function resolveKey(input: string): string | null {
+export function resolveKey(input: string): string | null {
   const k = input.trim().toLowerCase();
   if (ENGAGEMENTS[k]) return k;
   if (ALIASES[k]) return ALIASES[k];
   return null;
 }
 
-function planAgents(plan: DeploymentPlan): string[] {
+export function planAgents(plan: DeploymentPlan): string[] {
   return [...new Set(plan.groups.flatMap((g) => g.parallel))];
 }
 
-function renderPlan(plan: DeploymentPlan, cap: number): string {
+export function renderPlan(plan: DeploymentPlan, cap: number): string {
   const lines: string[] = [];
   lines.push(`ENGAGEMENT: ${plan.engagement} — ${plan.description}`);
   lines.push(`SKILLS:     ${plan.skills.join(", ")}`);
@@ -309,6 +298,17 @@ function renderPlan(plan: DeploymentPlan, cap: number): string {
 // --- CLI ---
 
 function main() {
+  const { values: args } = parseArgs({
+    args: Bun.argv.slice(2),
+    options: {
+      engagement: { type: "string" },   // engagement type or alias (see --list)
+      json: { type: "boolean", default: false },
+      validate: { type: "boolean", default: false },
+      list: { type: "boolean", default: false },
+      "max-parallel": { type: "string", default: "5" }, // concurrency cap hint
+    },
+  });
+
   const cap = parseInt(args["max-parallel"] || "5", 10);
 
   if (args.list || (!args.engagement && !args.validate)) {
@@ -356,4 +356,4 @@ function main() {
   console.log(renderPlan(plan, cap));
 }
 
-main();
+if (import.meta.main) main();

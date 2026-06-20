@@ -1,4 +1,6 @@
 # Dependencies
+dist/
+
 node_modules/
 bun.lockb
 

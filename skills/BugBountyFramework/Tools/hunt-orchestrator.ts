@@ -7,20 +7,6 @@
 import { parseArgs } from "util";
 import { homedir } from "os";
 
-const { values: args } = parseArgs({
-  args: Bun.argv.slice(2),
-  options: {
-    target: { type: "string" },
-    mode: { type: "string", default: "bounty" }, // bounty | pentest | comprehensive
-    resume: { type: "boolean", default: false },
-    status: { type: "boolean", default: false },
-    advance: { type: "string" },     // advance to next phase or specific phase
-    fail: { type: "string" },        // mark a phase as failed
-    "add-finding": { type: "string" }, // JSON finding to add
-    reset: { type: "boolean", default: false },
-  },
-});
-
 // --- Types ---
 
 export type PhaseStatus = "pending" | "running" | "completed" | "failed" | "skipped";
@@ -72,7 +58,7 @@ export interface HuntState {
 
 // --- Helpers ---
 
-function toSlug(url: string): string {
+export function toSlug(url: string): string {
   return url
     .replace(/^https?:\/\//, "")
     .replace(/[^a-z0-9]/gi, "-")
@@ -281,7 +267,7 @@ export function getHuntStatus(state: HuntState): string {
 
 // --- Session Listing ---
 
-async function listSessions(): Promise<void> {
+export async function listSessions(): Promise<void> {
   const sessionsDir = `${homedir()}/.claude/MEMORY/BugBounty/Sessions`;
   const glob = new Bun.Glob("*/hunt-state.json");
   const matches: string[] = [];
@@ -307,6 +293,20 @@ async function listSessions(): Promise<void> {
 // --- CLI ---
 
 async function main() {
+  const { values: args } = parseArgs({
+    args: Bun.argv.slice(2),
+    options: {
+      target: { type: "string" },
+      mode: { type: "string", default: "bounty" }, // bounty | pentest | comprehensive
+      resume: { type: "boolean", default: false },
+      status: { type: "boolean", default: false },
+      advance: { type: "string" },     // advance to next phase or specific phase
+      fail: { type: "string" },        // mark a phase as failed
+      "add-finding": { type: "string" }, // JSON finding to add
+      reset: { type: "boolean", default: false },
+    },
+  });
+
   if (!args.target && !args.status) {
     console.log("Usage:");
     console.log("  hunt-orchestrator --target URL [--mode bounty|pentest|comprehensive]");
@@ -408,4 +408,4 @@ async function main() {
   console.log(JSON.stringify(state, null, 2));
 }
 
-main().catch(console.error);
+if (import.meta.main) main().catch(console.error);

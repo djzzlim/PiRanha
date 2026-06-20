@@ -13,7 +13,9 @@
 </p>
 
 <p align="center">
-  <code>pi install git:github.com/h4ckologic/PiRanha</code>
+  <code>curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh</code>
+  <br/>
+  <sub>or as a Pi package — <code>pi install git:github.com/h4ckologic/PiRanha</code></sub>
 </p>
 
 <p align="center">
@@ -60,6 +62,57 @@ Drop it on a target and a *school* of small, hyper-specialized hunters hits the 
 
 ## Install
 
+### Binary (recommended)
+
+PiRanha ships as a single self-contained `piranha` binary — like [omp](https://omp.sh) — so you can classify a target, compute the swarm's deployment plan, and manage hunt state without any harness, then launch the agentic hunt inside one.
+
+```sh
+# macOS · Linux
+curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.ps1 | iex
+
+# Already have bun? Install from source instead of the prebuilt binary
+curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh -s -- --source
+
+# Pin a release tag / commit / branch
+curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh -s -- --ref v2.0.0
+```
+
+The installer drops `piranha` into `~/.local/bin` (prebuilt binary) or installs it with `bun install -g` from source. Then wire the swarm into your harness and hunt:
+
+```sh
+piranha doctor                 # check prerequisites + harness
+piranha install                # register the skill with omp / pi or Claude Code
+piranha hunt https://app.example.com --mode pentest
+```
+
+`piranha hunt` classifies the target, initializes the state machine, computes the routed agent plan, then launches the swarm inside whatever harness is on your PATH (omp / pi or Claude Code). The deterministic surface (`plan`, `status`, `agents`, `vault`) runs fully standalone.
+
+| Command | Does |
+|---|---|
+| `piranha hunt <target>` | Classify + launch a hunt (`--mode`, `--engagement`, `--creds`, `--harness`, `--resume`, `--dry-run`) |
+| `piranha status [target]` | Live hunt dashboard, or list all sessions |
+| `piranha plan <target\|type>` | Print the deterministic agent deployment plan |
+| `piranha agents [type]` | List routed agents (all, or per engagement) |
+| `piranha engagements` | List engagement types + aliases |
+| `piranha vault …` | Encrypted credential vault (`--store` / `--get` / `--list` / `--delete` / `--redact`) |
+| `piranha install` | Register the swarm skill with your harness |
+| `piranha update` | Update the binary to the latest release |
+| `piranha doctor` | Check prerequisites + environment |
+| `piranha completions <shell>` | Emit a bash / zsh / fish completion script |
+
+Shell completions are generated from the live command metadata (omp-style):
+
+```sh
+eval "$(piranha completions zsh)"     # zsh  → add to ~/.zshrc
+eval "$(piranha completions bash)"    # bash → add to ~/.bashrc
+piranha completions fish > ~/.config/fish/completions/piranha.fish
+```
+
+### As a Pi package
+
 PiRanha is a [Pi](https://pi.dev) package. The repo ships a `pi` manifest in `package.json`, so Pi auto-discovers the skill and registers the `/skill:piranha` command.
 
 ```bash
@@ -84,7 +137,7 @@ pi install -l git:github.com/h4ckologic/PiRanha
 
 Pi recursively loads `skills/BugBountyFramework/SKILL.md` as the **`piranha`** skill (Pi allows the skill name to differ from its directory, which keeps every internal tool path intact). The Bun tools — `agent-router.ts`, `hunt-orchestrator.ts`, `credential-vault.ts`, and the rest — are harness-agnostic and self-locating, so they run unchanged under Pi.
 
-> **Dual-harness:** PiRanha also runs in Claude Code via the bundled `install.sh` (see [Full Setup](#full-setup-guide)). The two install paths are independent. One runtime note: the parallel agent-dispatch in Phase 5 uses the Claude-Code `Agent({…})` API; under Pi the equivalent is the built-in `task` tool — the agent definitions, router, and tools are identical across both.
+> **Tri-harness:** the same swarm runs three ways — the standalone `piranha` binary (above), a Pi package (this section), and Claude Code (`piranha install` copies the skill into `~/.claude/skills`). All three share one set of agent definitions, router, and Bun tools. One runtime note: the parallel agent-dispatch in Phase 5 uses the Claude-Code `Agent({…})` API; under Pi/omp the equivalent is the built-in `task` tool.
 
 Manage the package with `pi list`, `pi update piranha`, and `pi remove piranha`. PiRanha appears in the [Pi package gallery](https://pi.dev/packages) once published (tagged `pi-package`).
 
@@ -351,7 +404,15 @@ flowchart TB
 
 ## Quick Start
 
-For the minimal PiRanha-only install (Claude Code):
+The fastest path — install the binary, then hunt:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh
+piranha install
+piranha hunt https://app.example.com
+```
+
+Or clone and install from source (Claude Code):
 
 ```bash
 git clone https://github.com/h4ckologic/PiRanha.git
