@@ -63,6 +63,16 @@ Drop it on a target and a *school* of small, hyper-specialized hunters hits the 
 
 ## Install
 
+### Prerequisite: a harness
+
+PiRanha launches the swarm *inside* a coding-agent harness, so install one first — **[omp](https://omp.sh) is recommended**:
+
+```sh
+curl -fsSL https://omp.sh/install | sh
+```
+
+Claude Code or pi work too; `piranha doctor` detects whichever is present. The deterministic commands (`plan`, `tools`, `status`, `vault`) run without a harness — only `hunt` needs one.
+
 ### Binary (recommended)
 
 PiRanha ships as a single self-contained `piranha` binary — like [omp](https://omp.sh) — so you can classify a target, compute the swarm's deployment plan, and manage hunt state without any harness, then launch the agentic hunt inside one.
@@ -89,7 +99,7 @@ piranha install                # register the skill with omp / pi or Claude Code
 piranha hunt https://app.example.com --mode pentest
 ```
 
-`piranha hunt` classifies the target, initializes the state machine, computes the routed agent plan, then launches the swarm inside whatever harness is on your PATH (omp / pi or Claude Code). The deterministic surface (`plan`, `status`, `agents`, `vault`) runs fully standalone.
+`piranha hunt` classifies the target, initializes the state machine, computes the routed agent plan, then launches the swarm inside whatever harness is on your PATH (omp / pi or Claude Code). The deterministic surface (`plan`, `tools`, `status`, `agents`, `vault`) runs fully standalone.
 
 | Command | Does |
 |---|---|
@@ -98,6 +108,7 @@ piranha hunt https://app.example.com --mode pentest
 | `piranha plan <target\|type>` | Print the deterministic agent deployment plan |
 | `piranha agents [type]` | List routed agents (all, or per engagement) |
 | `piranha engagements` | List engagement types + aliases |
+| `piranha tools [type]` | Per-domain dynamic tooling & MCP, checked against your PATH |
 | `piranha vault …` | Encrypted credential vault (`--store` / `--get` / `--list` / `--delete` / `--redact`) |
 | `piranha install` | Register the swarm skill with your harness |
 | `piranha update` | Update the binary to the latest release |
@@ -448,6 +459,35 @@ Each phase has **gate conditions** — the workflow only advances when the gate 
 | **Burp Bridge** | `Tools/burp-bridge.ts` | Burp Suite REST API bridge — scope sync, HAR export, Collaborator |
 | **Browser Harness** | `Tools/playwright-harness.ts` | Browser automation via dev-browser CLI (primary) / Playwright CLI (fallback) |
 | **Appium Harness** | `Tools/appium-harness.ts` | Mobile app testing — Android/iOS through proxy |
+| **Agent Router** | `Tools/agent-router.ts` | Engagement → ordered, dependency-aware agent deployment plan |
+
+---
+
+## Tooling & MCP per domain
+
+The bundled tools above are the harness-agnostic core. On top of them, each engagement drives domain-specific **dynamic-analysis tooling** and, optionally, **MCP servers**. `piranha tools [engagement]` prints this matrix and checks every CLI against your `PATH` (✓ found / · missing):
+
+```sh
+piranha tools            # every domain
+piranha tools android    # one domain — or a target: piranha tools app.apk
+```
+
+| Domain | Dynamic review | Key CLIs | MCP |
+|---|---|---|---|
+| **web** | `playwright-harness.ts` (dev-browser → Playwright fallback) + Burp via `burp-bridge.ts` | dev-browser, playwright, nuclei, ffuf, sqlmap, dalfox, subfinder, httpx | Burp Suite |
+| **api** | Burp proxy / scope / HAR + WebSocket & GraphQL clients | nuclei, ffuf, clairvoyance, websocat, jwt_tool | Burp Suite |
+| **llm** | `playwright-harness.ts` chat/RAG surface + Burp for the model API | dev-browser, playwright, nuclei | Burp Suite |
+| **android** | `appium-harness.ts` + Frida/objection live, drozer for IPC | adb, frida, objection, drozer, jadx, apktool, aapt, mobsfscan | mobile/ADB · Burp |
+| **ios** | `appium-harness.ts` + Frida/objection on a jailbroken device | frida, objection, ideviceinstaller, ghidra | mobile · Burp |
+| **binary** | gdb/lldb live debugging + AFL++/libFuzzer/honggfuzz fuzzing | ghidra, r2, gdb, lldb, afl-fuzz, pwntools | — |
+| **firmware** | FirmAE / Firmadyne full-system emulation of the rootfs | binwalk, unblob, sasquatch, firmwalker, ghidra | — |
+| **thick-client** | Frida runtime hooks + Burp for backend traffic | ghidra, frida, ilspycmd | Burp Suite |
+| **cloud** (aws/azure/gcp) | Authenticated provider session via pacu/cloudfox after a foothold | pacu, scout (ScoutSuite), cloudfox, prowler, aws/az/gcloud | — |
+| **kubernetes** | kubectl against the API + in-cluster escape tooling | kubectl, kube-hunter, peirates, kdigger, trivy | — |
+| **network / AD** | nmap NSE + netexec live exploitation; BloodHound for AD paths | nmap, nxc, hydra, responder, bloodhound-python, certipy | Shodan |
+| **recon** | Passive + active surface discovery (no payloads) | subfinder, httpx, nuclei, amass, dnsx, dnsreaper | Shodan |
+
+`piranha doctor` checks runtime / harness / skill; `piranha tools` checks the offensive tooling per domain. A missing CLI just means that one technique is skipped — the swarm degrades gracefully rather than failing.
 
 ---
 

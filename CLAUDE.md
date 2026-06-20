@@ -4,7 +4,7 @@ This project is a Claude Code skill for autonomous bug bounty hunting.
 
 ## Key Files
 - `skills/BugBountyFramework/SKILL.md` — Main skill definition (loaded by Claude Code)
-- `cli/piranha.ts` — the `piranha` launcher binary (compiled via `bun build --compile`). Classifies a target, drives the hunt-orchestrator state machine, computes the router plan, and launches the harness (omp/pi or Claude Code). Standalone subcommands: `hunt`, `status`, `plan`, `agents`, `engagements`, `vault`, `install`, `doctor`, `completions`, `update`.
+- `cli/piranha.ts` — the `piranha` launcher binary (compiled via `bun build --compile`). Classifies a target, drives the hunt-orchestrator state machine, computes the router plan, and launches the harness (omp/pi or Claude Code). Standalone subcommands: `hunt`, `status`, `plan`, `agents`, `engagements`, `tools` (per-domain dynamic tooling/MCP capture + PATH check), `vault`, `install`, `doctor`, `completions`, `update`.
 - `skills/BugBountyFramework/Agents/*.md` — 53 specialized agents (51 hunters/specialists + ValidatorAgent + ExploitChainAgent)
 - `skills/BugBountyFramework/Tools/*.ts` — TypeScript tools (Bun runtime)
 - `skills/BugBountyFramework/Tools/agent-router.ts` — engagement type → ordered, dependency-aware agent deployment plan

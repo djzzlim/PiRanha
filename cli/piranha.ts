@@ -467,6 +467,128 @@ function checkTool(name: string): boolean {
   return Bun.which(name) !== null;
 }
 
+// ---------------------------------------------------------------------------
+// Per-domain tooling & MCP capture — what each engagement actually drives for
+// dynamic / runtime review. Grounded in the agent playbooks under skills/.
+// ---------------------------------------------------------------------------
+
+interface DomainTooling {
+  dynamic: string;   // how dynamic / runtime review happens for this domain
+  cli: string[];     // external CLIs the agents drive (checked against PATH)
+  mcp: string[];     // MCP servers that augment this domain
+}
+
+const TOOLING_BY_ENGAGEMENT: Record<string, DomainTooling> = {
+  web: {
+    dynamic: "playwright-harness.ts (dev-browser CLI → Playwright CLI fallback) + Burp via burp-bridge.ts",
+    cli: ["dev-browser", "playwright", "nuclei", "ffuf", "sqlmap", "subfinder", "httpx", "dalfox"],
+    mcp: ["Burp Suite MCP"],
+  },
+  api: {
+    dynamic: "Burp via burp-bridge.ts (proxy, scope sync, HAR) + WebSocket/GraphQL clients",
+    cli: ["nuclei", "ffuf", "clairvoyance", "websocat", "jwt_tool"],
+    mcp: ["Burp Suite MCP"],
+  },
+  llm: {
+    dynamic: "playwright-harness.ts for the chat/RAG surface + Burp for the model API",
+    cli: ["dev-browser", "playwright", "nuclei"],
+    mcp: ["Burp Suite MCP"],
+  },
+  android: {
+    dynamic: "appium-harness.ts + Frida/objection on a live device, drozer for IPC",
+    cli: ["adb", "frida", "objection", "drozer", "jadx", "apktool", "aapt", "mobsfscan", "nuclei"],
+    mcp: ["mobile / ADB MCP", "Burp Suite MCP"],
+  },
+  ios: {
+    dynamic: "appium-harness.ts + Frida/objection on a jailbroken device",
+    cli: ["frida", "objection", "ideviceinstaller", "ghidra"],
+    mcp: ["mobile MCP", "Burp Suite MCP"],
+  },
+  mobile: {
+    dynamic: "appium-harness.ts + Frida/objection across both Android and iOS tracks",
+    cli: ["adb", "frida", "objection", "drozer", "jadx", "apktool", "ideviceinstaller"],
+    mcp: ["mobile / ADB MCP", "Burp Suite MCP"],
+  },
+  binary: {
+    dynamic: "gdb / lldb live debugging; AFL++/libFuzzer/honggfuzz fuzzing",
+    cli: ["ghidra", "r2", "gdb", "lldb", "afl-fuzz", "pwntools"],
+    mcp: [],
+  },
+  firmware: {
+    dynamic: "FirmAE / Firmadyne full-system emulation of the extracted rootfs",
+    cli: ["binwalk", "unblob", "sasquatch", "firmwalker", "ghidra"],
+    mcp: [],
+  },
+  "thick-client": {
+    dynamic: "Frida runtime hooks + Burp for the client's backend traffic",
+    cli: ["ghidra", "frida", "ilspycmd"],
+    mcp: ["Burp Suite MCP"],
+  },
+  cloud: {
+    dynamic: "Authenticated provider sessions via pacu / cloudfox after a foothold",
+    cli: ["pacu", "scout", "cloudfox", "prowler"],
+    mcp: [],
+  },
+  "cloud-aws": {
+    dynamic: "aws CLI session + pacu privesc modules in a sandboxed session",
+    cli: ["aws", "pacu", "cloudfox", "scout", "prowler"],
+    mcp: [],
+  },
+  "cloud-azure": {
+    dynamic: "az CLI + ROADtools / AzureHound enumeration of Entra ID",
+    cli: ["az", "scout", "prowler", "roadrecon"],
+    mcp: [],
+  },
+  "cloud-gcp": {
+    dynamic: "gcloud CLI + service-account impersonation chains",
+    cli: ["gcloud", "scout", "prowler"],
+    mcp: [],
+  },
+  kubernetes: {
+    dynamic: "kubectl against the API + in-cluster escape tooling",
+    cli: ["kubectl", "kube-hunter", "peirates", "kdigger", "trivy"],
+    mcp: [],
+  },
+  network: {
+    dynamic: "nmap NSE + netexec live service exploitation; BloodHound for AD paths",
+    cli: ["nmap", "nxc", "hydra", "responder", "bloodhound-python", "certipy"],
+    mcp: ["Shodan MCP"],
+  },
+  recon: {
+    dynamic: "Passive + active surface discovery; no payloads fired",
+    cli: ["subfinder", "httpx", "nuclei", "amass", "dnsx", "dnsreaper"],
+    mcp: ["Shodan MCP"],
+  },
+};
+
+function printDomainTooling(key: string, t: DomainTooling): void {
+  const mark = (ok: boolean) => (ok ? color("green", "✓") : color("yellow", "·"));
+  console.log(color("bold", `\n${key}`) + color("dim", ` — ${ENGAGEMENTS[key]?.description ?? ""}`));
+  console.log(`  ${color("dim", "dynamic:")} ${t.dynamic}`);
+  console.log(`  ${color("dim", "cli:    ")} ${t.cli.map((c) => `${mark(checkTool(c))} ${c}`).join("   ")}`);
+  if (t.mcp.length > 0) console.log(`  ${color("dim", "mcp:    ")} ${t.mcp.join(", ")}`);
+}
+
+function cmdTools(rest: string[]): number {
+  const { positionals } = parseFlags(rest);
+  const input = positionals[0];
+  console.log(color("bold", "Per-domain tooling & MCP capture"));
+  console.log(color("dim", "  ✓ on PATH   · not installed (needed for that domain's dynamic testing)"));
+
+  if (input) {
+    const key = resolveKey(input) ?? classify(input);
+    const t = TOOLING_BY_ENGAGEMENT[key];
+    if (!t) die(`No tooling capture for engagement "${key}".`);
+    printDomainTooling(key, t!);
+    return 0;
+  }
+  for (const key of Object.keys(TOOLING_BY_ENGAGEMENT)) {
+    printDomainTooling(key, TOOLING_BY_ENGAGEMENT[key]!);
+  }
+  console.log(color("dim", "\nScope to one domain: `piranha tools <engagement|target>`"));
+  return 0;
+}
+
 function cmdDoctor(): number {
   const mark = (ok: boolean) => (ok ? color("green", "[ok]  ") : color("yellow", "[--]  "));
   console.log(color("bold", "PiRanha environment check\n"));
@@ -492,6 +614,7 @@ function cmdDoctor(): number {
   for (const t of ["subfinder", "httpx", "nuclei", "ffuf", "sqlmap", "op", "burpsuite"]) {
     console.log(`  ${mark(checkTool(t))}${t}`);
   }
+  console.log(color("dim", "  → `piranha tools` lists per-domain tooling for every engagement"));
 
   console.log("");
   if (!anyHarness) {
@@ -506,7 +629,7 @@ function cmdCompletions(rest: string[]): number {
   const { positionals } = parseFlags(rest);
   const shell = positionals[0];
   const engagements = [...Object.keys(ENGAGEMENTS), ...Object.keys(ALIASES)].join(" ");
-  const cmds = "hunt status plan agents engagements vault install update doctor completions version help";
+  const cmds = "hunt status plan agents engagements tools vault install update doctor completions version help";
   const flags = "--mode --engagement --creds --harness --resume --status --dry-run --max-parallel --json";
 
   if (shell === "bash") {
@@ -541,7 +664,7 @@ _piranha() {
     args)
       case $words[1] in
         completions) _values 'shell' bash zsh fish;;
-        hunt|plan|agents) _values 'engagement' ${engagements};;
+        hunt|plan|agents|tools) _values 'engagement' ${engagements};;
         *) _values 'flag' ${flags};;
       esac;;
   esac
@@ -595,6 +718,7 @@ ${color("bold", "COMMANDS")}
   plan <target|type>   Print the deterministic agent deployment plan
   agents [type]        List routed agents (all, or for one engagement)
   engagements          List engagement types and aliases
+  tools [type]         List per-domain tooling & MCP, checking your PATH
   vault ...            Credential vault (passthrough: --store/--get/--list/--delete/--redact)
   install              Install the PiRanha skill into your harness
   update               Update the piranha binary to the latest release
@@ -619,6 +743,7 @@ ${color("bold", "EXAMPLES")}
   piranha hunt https://app.example.com --mode pentest
   piranha plan 10.0.0.0/24
   piranha hunt app.apk --dry-run
+  piranha tools android
 
 ${color("dim", "Authorized testing only. Configure scope before hunting.")}`);
   return 0;
@@ -659,6 +784,8 @@ async function main(): Promise<number> {
       return await cmdUpdate();
     case "doctor":
       return cmdDoctor();
+    case "tools":
+      return cmdTools(rest);
     case "completions":
     case "completion":
       return cmdCompletions(rest);
