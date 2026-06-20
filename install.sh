@@ -11,15 +11,15 @@ NC='\033[0m'
 
 echo ""
 echo -e "${CYAN}${BOLD}"
-echo "  ____              _   _             _              _    ___ "
-echo " | __ ) _   _  __ _| | | |_   _ _ __ | |_ ___ _ __  / \  |_ _|"
-echo " |  _ \| | | |/ _\` | |_| | | | | '_ \| __/ _ \ '__// _ \  | | "
-echo " | |_) | |_| | (_| |  _  | |_| | | | | ||  __/ | / ___ \ | | "
-echo " |____/ \__,_|\__, |_| |_|\__,_|_| |_|\__\___|_|/_/   \_\___|"
-echo "              |___/                                            "
+echo '██████╗ ██╗██████╗  █████╗ ███╗   ██╗██╗  ██╗ █████╗ '
+echo '██╔══██╗██║██╔══██╗██╔══██╗████╗  ██║██║  ██║██╔══██╗'
+echo '██████╔╝██║██████╔╝███████║██╔██╗ ██║███████║███████║'
+echo '██╔═══╝ ██║██╔══██╗██╔══██║██║╚██╗██║██╔══██║██╔══██║'
+echo '██║     ██║██║  ██║██║  ██║██║ ╚████║██║  ██║██║  ██║'
+echo '╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝'
 echo -e "${NC}"
-echo -e "${BOLD}  Autonomous Bug Bounty Hunting Framework${NC}"
-echo -e "  Powered by Claude Code"
+echo -e "${BOLD}  🐟 PiRanha — The Autonomous Bug-Bounty Swarm${NC}"
+echo -e "  53 specialized AI agents · Powered by Pi + Claude Code"
 echo ""
 
 # Check prerequisites

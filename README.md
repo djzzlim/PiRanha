@@ -1,42 +1,96 @@
 <p align="center">
-  <img src="docs/images/bughunter-banner.png" alt="BugHunter AI" width="800" />
+  <img src="docs/images/piranha-banner.svg" alt="PiRanha - Autonomous Bug-Bounty Swarm" width="900" />
 </p>
 
-<h1 align="center">BugHunter AI</h1>
+<h1 align="center">🐟 PiRanha</h1>
 
 <p align="center">
-  <strong>Autonomous Bug Bounty Hunting Framework Powered by Claude Code + PAI</strong>
-</p>
-
-<p align="center">
-  <em>28 specialized AI agents. 8 orchestrated workflows. State-machine orchestration. 51 skills. Zero human input required.</em>
+  <strong>The Autonomous Bug-Bounty Swarm</strong>
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> &bull;
-  <a href="#full-setup-guide">Full Setup</a> &bull;
-  <a href="#pai-superpowers">Superpowers</a> &bull;
+  <em>A school of <b>53 specialized AI security agents</b> + a deterministic engagement router that classify any target and strip it to the bone — in parallel.</em>
+</p>
+
+<p align="center">
+  <code>pi install git:github.com/h4ckologic/PiRanha</code>
+</p>
+
+<p align="center">
+  <a href="#why-piranha">Why PiRanha</a> &bull;
+  <a href="#install">Install</a> &bull;
+  <a href="#agents">The Swarm</a> &bull;
   <a href="#architecture">Architecture</a> &bull;
-  <a href="#agents">Agents</a> &bull;
   <a href="#sample-prompts">Prompts</a> &bull;
   <a href="#contributing">Contributing</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Claude_Code-Opus_4-blueviolet?style=for-the-badge&logo=anthropic" alt="Claude Code" />
-  <img src="https://img.shields.io/badge/PAI-v3.0-blue?style=for-the-badge" alt="PAI v3.0" />
-  <img src="https://img.shields.io/badge/Agents-28-orange?style=for-the-badge" alt="28 Agents" />
-  <img src="https://img.shields.io/badge/Skills-51-green?style=for-the-badge" alt="51 Skills" />
-  <img src="https://img.shields.io/badge/TypeScript-Bun-black?style=for-the-badge&logo=bun" alt="Bun" />
-  <img src="https://img.shields.io/badge/Burp_Suite-MCP-red?style=for-the-badge" alt="Burp MCP" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
+  <img src="https://img.shields.io/badge/Pi_Package-PiRanha-00b894?style=for-the-badge" alt="Pi Package" />
+  <img src="https://img.shields.io/badge/Agents-53-ff3b30?style=for-the-badge" alt="53 Agents" />
+  <img src="https://img.shields.io/badge/Engagements-16-orange?style=for-the-badge" alt="16 Engagements" />
+  <img src="https://img.shields.io/badge/Runtime-Bun%20%2B%20TypeScript-black?style=for-the-badge&logo=bun" alt="Bun + TypeScript" />
+  <img src="https://img.shields.io/badge/Harness-Pi%20%2B%20Claude%20Code-blueviolet?style=for-the-badge" alt="Pi + Claude Code" />
+  <img src="https://img.shields.io/badge/License-MIT-3fb950?style=for-the-badge" alt="MIT License" />
+</p>
+
+<p align="center">
+  <sub>web &middot; api &middot; graphql &middot; llm &amp; agentic/mcp &middot; mobile (android/ios) &middot; binary &amp; firmware &middot; cloud (aws/azure/gcp/k8s) &middot; network &amp; active directory</sub>
 </p>
 
 ---
 
-## What is BugHunter AI?
+## Why PiRanha?
 
-BugHunter AI is an **autonomous bug bounty hunting framework** that turns [Claude Code](https://docs.anthropic.com/en/docs/claude-code) into an elite security researcher. Built on top of the **PAI (Personal AI Infrastructure)** system, it combines 20 specialized vulnerability agents, 51 skills, 13 expert AI agents, 20 lifecycle hooks, and a full offensive security toolchain into a single command:
+A single scanner is a shark — one big jaw, slow, easy to see coming. **PiRanha is a swarm.**
+
+Drop it on a target and a *school* of small, hyper-specialized hunters hits the water at once. Each agent knows exactly one thing — SSTI, IAM privilege escalation, Kerberoasting, MCP tool-poisoning, request smuggling — and goes straight for it. A deterministic router decides which piranhas to release based on what the target *is*. A validator spits out the false positives. An exploit-chain agent stitches the individual bites into a kill. Nothing is left on the bone.
+
+| The piranha 🐟 | PiRanha 🤖 |
+|---|---|
+| A swarm of small, specialized fish | 53 single-purpose security agents |
+| Each strikes the part it is built for | Per-vuln-class expertise, hypothesis-driven |
+| The school coordinates the attack | Engagement router + true parallel dispatch |
+| Strips a target in seconds | Recon → profile → swarm → validate → chain |
+| Smells blood from far away | AppProfile finds where the bugs actually live |
+
+> Named for the [Pi](https://pi.dev) harness it ships on — and for what the swarm does to a target.
+
+---
+
+## Install
+
+PiRanha is a [Pi](https://pi.dev) package. The repo ships a `pi` manifest in `package.json`, so Pi auto-discovers the skill and registers the `/skill:piranha` command.
+
+```bash
+# Install from GitHub (a pinned tag/commit ref is recommended for reproducibility)
+pi install git:github.com/h4ckologic/PiRanha
+
+# Try it for a single session, without installing
+pi -e git:github.com/h4ckologic/PiRanha
+
+# Project-scoped install (writes .pi/settings.json — shareable with your team)
+pi install -l git:github.com/h4ckologic/PiRanha
+
+# Then, inside pi:
+/skill:piranha hunt https://app.example.com
+```
+
+**How the package is wired** (`package.json`):
+
+```json
+{ "name": "piranha", "keywords": ["pi-package"], "pi": { "skills": ["./skills"] } }
+```
+
+Pi recursively loads `skills/BugBountyFramework/SKILL.md` as the **`piranha`** skill (Pi allows the skill name to differ from its directory, which keeps every internal tool path intact). The Bun tools — `agent-router.ts`, `hunt-orchestrator.ts`, `credential-vault.ts`, and the rest — are harness-agnostic and self-locating, so they run unchanged under Pi.
+
+> **Dual-harness:** PiRanha also runs in Claude Code via the bundled `install.sh` (see [Full Setup](#full-setup-guide)). The two install paths are independent. One runtime note: the parallel agent-dispatch in Phase 5 uses the Claude-Code `Agent({…})` API; under Pi the equivalent is the built-in `task` tool — the agent definitions, router, and tools are identical across both.
+
+Manage the package with `pi list`, `pi update piranha`, and `pi remove piranha`. PiRanha appears in the [Pi package gallery](https://pi.dev/packages) once published (tagged `pi-package`).
+
+## What is PiRanha?
+
+**PiRanha** is an **autonomous bug-bounty swarm** that turns [Pi](https://pi.dev) (or [Claude Code](https://docs.anthropic.com/en/docs/claude-code)) into an elite security team. It combines 53 specialized vulnerability agents, a deterministic engagement router, 51 skills, 13 expert AI agents, and a full offensive-security toolchain behind a single command:
 
 ```bash
 # That's it. One command. Autonomous hunting.
@@ -53,25 +107,25 @@ hunt https://app.example.com
 
 ---
 
-## Why BugHunter AI?
+## PiRanha vs. Manual Bug Bounty
 
-| Manual Bug Bounty | BugHunter AI |
+| Manual Bug Bounty | PiRanha |
 |---|---|
 | Hours of recon before first payload | Autonomous recon → profiling → attack in minutes |
 | Forget where you left off between sessions | State machine checkpoints every phase — `--resume` anytime |
 | Credentials in plaintext notes | Encrypted vault with 1Password integration |
 | Run same tools blindly on every target | Hypothesis-driven: agents attack WHERE the AppProfile says bugs live |
 | Test one thing at a time | 5 agents run in parallel, findings shared in real-time |
-| Miss AI/LLM vulnerabilities | Dedicated LLMSecurityAgent with OWASP LLM Top 10 |
+| Miss AI/LLM vulnerabilities | Dedicated LLMSecurityAgent (OWASP LLM Top 10) + AIAgentExploitationAgent (tool-calling / MCP / agentic) |
 | Medium findings silently dropped | Mediums archived for attack chain correlation |
 | No memory between hunts | Cross-session learning — gets smarter with every engagement |
 | Single tool / single domain | 51 skills covering web, mobile, API, cloud, network, binary, AI |
 
 ---
 
-## The Full Stack: PAI + Superpowers + BugHunter
+## The Full Stack: PAI + Superpowers + PiRanha
 
-BugHunter AI is not just a skill — it's part of a **complete offensive security infrastructure**. Here's what you get when you install the full setup:
+PiRanha is more than a skill — it plugs into a **complete offensive-security infrastructure**. Here's what you get with the full setup:
 
 ### PAI (Personal AI Infrastructure) v3.0
 
@@ -297,11 +351,11 @@ flowchart TB
 
 ## Quick Start
 
-For the minimal BugHunter-only install:
+For the minimal PiRanha-only install (Claude Code):
 
 ```bash
-git clone https://github.com/h4ckologic/bughunter-ai.git
-cd bughunter-ai
+git clone https://github.com/h4ckologic/PiRanha.git
+cd PiRanha
 ./install.sh
 ```
 
@@ -343,7 +397,7 @@ hunt https://target.com --mode comprehensive  # comprehensive mode
 
 ## Agents
 
-BugHunter deploys **20 specialized agents**, each an expert in one vulnerability class:
+PiRanha deploys **53 specialized agents**, each an expert in one vulnerability class or domain. Hunter agents find bugs; two meta-agents (ValidatorAgent, ExploitChainAgent) reproduce, de-dup, and weaponize them into chains. A deterministic router (`Tools/agent-router.ts`) selects and orders agents per engagement type:
 
 | Agent | Focus | Key Techniques |
 |-------|-------|----------------|
@@ -375,13 +429,38 @@ BugHunter deploys **20 specialized agents**, each an expert in one vulnerability
 | **RaceConditionAgent** | Race conditions | HTTP/2 single-packet attack, limit bypass, double-spend, TOCTOU |
 | **PrototypePollutionAgent** | Prototype pollution | Client-side PP→XSS gadgets, server-side PP→RCE, AST injection |
 | **LLMAgent** | Legacy LLM testing | Basic prompt testing (superseded by LLMSecurityAgent) |
+| **SSTIAgent** | Server-side template injection | Per-engine RCE: Jinja2/Twig/Smarty/Freemarker/Velocity/Pebble/Thymeleaf/ERB/Handlebars/Pug/Razor/Go, sandbox escape, blind OOB |
+| **CommandInjectionAgent** | OS command injection | In-band/blind/time-based, OOB exfil, argument & option injection, IFS/wildcard WAF bypass, *nix + Windows |
+| **DeserializationAgent** | Insecure deserialization | Gadget chains for Java (ysoserial), .NET (ViewState/Json.NET), PHP (phpggc/phar), Python (pickle), Ruby, Node |
+| **NoSQLiAgent** | NoSQL injection | Operator/JS injection, auth bypass, blind regex/time extraction — MongoDB/CouchDB/Redis/Cassandra/Elasticsearch |
+| **PathTraversalAgent** | Path traversal / LFI / RFI | Encodings, PHP wrappers, log poisoning, /proc, session poisoning, zip-slip, cloud-cred file read |
+| **CRLFAgent** | CRLF / response splitting | Header & response-line injection → XSS, cache poison, session fixation, host-header & email-header injection |
+| **OAuthAgent** | OAuth2 / OIDC / SAML / SSO | redirect_uri abuse, state CSRF account-linking, PKCE downgrade, SAML XSW, jku/x5u SSRF, pre-account ATO |
+| **OpenRedirectAgent** | Open redirect (chain primitive) | Bypass arsenal + chains: OAuth code/token theft, SSRF allow-list bypass, CSP bypass, reflected→stored |
+| **SecretsExposureAgent** | Exposed secrets / info disclosure | .git/.env dump, source-map reconstruction, debug endpoints, validated live secrets (trufflehog/gitleaks) |
+| **CloudExploitationAgent** | Cloud / IAM / k8s priv-esc | IMDS→cred theft, IAM priv-esc paths, S3/blob takeover, kubelet/etcd/API, container escape (pacu/cloudfox/peirates) |
+| **SupplyChainAgent** | Supply chain / CI-CD | Dependency confusion, leaked registry/CI tokens, GitHub Actions PPE, unpinned actions, vuln deps (gato/osv-scanner) |
+| **AIAgentExploitationAgent** | Agentic AI / tool-calling / MCP | Indirect injection → tool call, MCP tool poisoning/rug-pull, excessive agency, memory poisoning (MITRE ATLAS) |
+| **ValidatorAgent** | Finding validation / triage | Clean-room reproduction, false-positive killer, root-cause dedup, CVSS 3.1 + 4.0, hunt-mode gate |
+| **ExploitChainAgent** | Attack-chain correlation | Finding graph, kill-chain assembly, MITRE ATT&CK mapping, combined PoC, elevated blast-radius CVSS |
+| **AndroidAgent** | Android app security | Exported components/providers (drozer), WebView RCE, deep-link/app-link hijack, storage, SSL-pinning & root bypass (Frida/objection), Firebase |
+| **iOSAgent** | iOS app security | Mach-O/IPA decrypt, keychain & Data-Protection, URL-scheme/universal-link hijack, WKWebView, jailbreak/pinning/biometric bypass |
+| **MemoryCorruptionAgent** | Native bug discovery | Fuzzing (AFL++/libFuzzer/honggfuzz), ASAN/UBSAN, crash triage & exploitability — feeds ExploitDevAgent |
+| **FirmwareAgent** | Firmware / embedded / IoT | Extraction (binwalk/unblob), secret & backdoor mining, U-Boot abuse, full-system emulation (FirmAE), UART/JTAG/SPI |
+| **AWSAgent** | AWS exploitation | IAM priv-esc paths (PassRole/AssumeRole/CreatePolicyVersion…), S3/Lambda/Cognito, snapshot exfil, Secrets Manager (Pacu/cloudfox) |
+| **AzureAgent** | Azure / Entra ID | Managed identities, Entra-role vs RBAC priv-esc, Key Vault, Storage SAS, Automation runbooks, consent phishing (ROADtools/AzureHound) |
+| **GCPAgent** | GCP exploitation | Service-account impersonation, IAM priv-esc, GCS, Functions/Run, metadata, GKE workload identity (gcloud/GCPLoot) |
+| **KubernetesAgent** | Kubernetes / containers | RBAC priv-esc, exposed API/kubelet/etcd, SA-token abuse, pod→node & container escape (kube-hunter/peirates/kdigger) |
+| **ActiveDirectoryAgent** | Active Directory / Kerberos | Kerberoast/AS-REP, delegation, ACL abuse, DCSync, ADCS ESC1-13 (Certipy), NTLM coercion+relay, BloodHound paths |
+| **NetworkServiceAgent** | Network service exploitation | nmap NSE, SMB/RDP/SNMP/DB/printer exploitation, default/weak creds (netexec/hydra), version→CVE |
+| **LateralMovementAgent** | Lateral movement / pivoting | PtH/PtT/PtK, remote exec (PsExec/WMI/WinRM), credential harvesting (LSASS/DPAPI), tunneling (ligolo-ng/chisel) |
 
 ### How Agents Work
 
 Agents don't blindly scan. They receive **specific hypotheses** from the AppProfile:
 
 ```
-Traditional scanning:          BugHunter AI:
+Traditional scanning:          PiRanha:
 "Run sqlmap on all URLs"   →   "The /api/v1/reports?filter= parameter
                                 is passed into a PostgreSQL ORDER BY
                                 clause — test time-based blind SQLi HERE"
@@ -397,14 +476,14 @@ The hunt orchestrator classifies your target and dispatches the appropriate work
 
 | Workflow | Trigger | Phases | Agents | Lines |
 |----------|---------|--------|--------|-------|
-| **W_HUNT_WEB** | Web application URL | 10 | 21 agents (parallel) | 2,018 |
-| **W_HUNT_API** | API endpoint / Swagger / GraphQL | 9 | 10 agents | 487 |
-| **W_HUNT_LLM** | AI/LLM app (chatbot, RAG, copilot) | 13 | 8 agents | 688 |
-| **W_HUNT_MOBILE** | APK / IPA file | 10 | 7 agents | 1,037 |
-| **W_HUNT_NETWORK** | IP range / CIDR / AD target | 9 | 5 agents | 814 |
-| **W_HUNT_CLOUD** | AWS / Azure / GCP environment | 10 | 5 agents | 607 |
-| **W_HUNT_THICK_CLIENT** | Electron / .NET / Java desktop app | 10 | 6 agents | 874 |
-| **W_RECON** | Standalone recon request | 10 | 2 agents | 703 |
+| **W_HUNT_WEB** | Web application URL | 10 | 29 agents (parallel) | 2,018 |
+| **W_HUNT_API** | API endpoint / Swagger / GraphQL | 9 | 17 agents | 487 |
+| **W_HUNT_LLM** | AI/LLM app (chatbot, RAG, copilot) | 13 | 11 agents | 688 |
+| **W_HUNT_MOBILE** | APK / IPA file | 10 | 14 agents (Android + iOS tracks) | 1,037 |
+| **W_HUNT_NETWORK** | IP range / CIDR / AD target | 9 | 10 agents | 814 |
+| **W_HUNT_CLOUD** | AWS / Azure / GCP environment | 10 | 14 agents (per-provider) | 607 |
+| **W_HUNT_THICK_CLIENT** | Electron / .NET / Java / native | 10 | 12 agents | 874 |
+| **W_RECON** | Standalone recon request | 10 | 5 agents | 703 |
 
 ### How Workflows Work
 
@@ -552,10 +631,10 @@ hunt https://target.com --status
 ## Directory Structure
 
 ```
-# BugHunter AI Skill (installed to ~/.claude/skills/)
+# PiRanha skill (installed to ~/.claude/skills/)
 ~/.claude/skills/BugBountyFramework/
 ├── SKILL.md                     # Main skill definition (v2.0)
-├── Agents/                      # 20 specialized vulnerability agents
+├── Agents/                      # 53 specialized agents (51 hunters/specialists + ValidatorAgent + ExploitChainAgent)
 │   ├── AppReviewAgent.md
 │   ├── LLMSecurityAgent.md
 │   ├── XSSAgent.md
@@ -575,9 +654,11 @@ hunt https://target.com --status
 │   ├── ReverseEngineeringAgent.md
 │   ├── ExploitDevAgent.md
 │   ├── DesktopAppAgent.md
-│   └── LLMAgent.md
+│   ├── LLMAgent.md             # (legacy — superseded by LLMSecurityAgent)
+│   └── ...                     # + 33 more specialist agents (full list in SKILL.md -> Agents Reference)
 ├── Tools/                       # TypeScript tools (Bun runtime)
 │   ├── hunt-orchestrator.ts
+│   ├── agent-router.ts          # engagement type -> ordered agent deployment plan
 │   ├── credential-vault.ts
 │   ├── auth-manager.ts
 │   ├── burp-bridge.ts
@@ -651,7 +732,7 @@ hunt https://target.com --status
 
 ## How It Differs from Other Tools
 
-| Feature | BugHunter AI | Nuclei/Burp Scanner | Manual Testing |
+| Feature | PiRanha | Nuclei/Burp Scanner | Manual Testing |
 |---------|-------------|---------------------|----------------|
 | **Intelligence** | Understands the app first, then attacks | Signature matching | Human expertise |
 | **Context** | Remembers across sessions | Stateless | Notes/memory |
@@ -675,7 +756,7 @@ This framework is designed for **authorized security testing only**:
 - Penetration tests with **signed engagement letters**
 - Your own applications in **staging/development environments**
 
-**BugHunter AI enforces scope:** The framework includes hard scope enforcement that blocks testing out-of-scope targets. Configure your scope before hunting.
+**PiRanha enforces scope:** The framework includes hard scope enforcement that blocks testing out-of-scope targets. Configure your scope before hunting.
 
 The maintainers are not responsible for misuse. Always follow your program's rules of engagement.
 
@@ -707,7 +788,7 @@ MIT License. See [LICENSE](LICENSE) for details.
 - **[Anthropic](https://anthropic.com)** — Claude Code, the AI engine behind everything
 - **[Daniel Miessler / PAI](https://github.com/danielmiessler/PAI)** — Personal AI Infrastructure v3.0 — the foundation layer providing the Algorithm (v1.5.0), 51 skills, 13 expert agents, 20 lifecycle hooks, cross-session memory, and the structured reasoning framework that makes autonomous hunting possible
 - **[Claude Code Superpowers](https://github.com/anthropics/claude-code)** — Official Claude Code plugin enabling enhanced tool access, advanced agent orchestration with team mode, and extended MCP server integration that powers parallel agent deployment
-- **[claude-mem](https://github.com/thedotmack/claude-mem)** — Persistent cross-session memory plugin that enables BugHunter's learning system to remember techniques, patterns, and findings across hunts
+- **[claude-mem](https://github.com/thedotmack/claude-mem)** — Persistent cross-session memory plugin that powers PiRanha's learning system — remembering techniques, patterns, and findings across hunts
 - **[PortSwigger](https://portswigger.net)** — Burp Suite integration via custom MCP bridge
 - **[ProjectDiscovery](https://projectdiscovery.io)** — Nuclei, httpx, subfinder, naabu — the recon backbone
 - **[Playwright](https://playwright.dev)** — Browser automation for dynamic testing and app profiling
@@ -722,5 +803,5 @@ MIT License. See [LICENSE](LICENSE) for details.
 </p>
 
 <p align="center">
-  <em>If BugHunter AI helps you find bugs, give it a star!</em>
+  <em>If PiRanha helps you find bugs, give it a star! 🐟</em>
 </p>

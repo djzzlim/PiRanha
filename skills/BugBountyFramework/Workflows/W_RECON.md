@@ -2,7 +2,7 @@
 name: W_RECON
 description: Comprehensive attack surface discovery and reconnaissance
 trigger: Standalone recon request or first phase of any hunt
-agents: [ReconAgent, SubdomainTakeoverAgent]
+agents: [ReconAgent, SubdomainTakeoverAgent, SecretsExposureAgent, ValidatorAgent, ExploitChainAgent]
 tools: [dev-browser, burp-bridge]
 skills_invoked: [Recon, OSINT]
 ---

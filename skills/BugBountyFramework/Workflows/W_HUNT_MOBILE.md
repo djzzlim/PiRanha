@@ -2,7 +2,7 @@
 name: W_HUNT_MOBILE
 description: Mobile application security assessment for Android and iOS
 trigger: APK file, IPA file, or mobile app URL detected
-agents: [MobileAgent, APIAgent, AuthAgent, IDORAgent, ReverseEngineeringAgent, SSRFAgent, SQLiAgent]
+agents: [AppReviewAgent, AndroidAgent, iOSAgent, MobileAgent, APIAgent, AuthAgent, OAuthAgent, IDORAgent, ReverseEngineeringAgent, SSRFAgent, SQLiAgent, SecretsExposureAgent, ValidatorAgent, ExploitChainAgent]
 tools: [appium-harness, burp-bridge, credential-vault]
 skills_invoked: [MobileSecurity]
 ---

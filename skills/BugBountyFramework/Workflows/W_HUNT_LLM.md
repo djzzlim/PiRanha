@@ -2,7 +2,7 @@
 name: W_HUNT_LLM
 description: AI/LLM application security assessment covering OWASP LLM Top 10
 trigger: AI/LLM application detected (chatbot, RAG app, AI agent, copilot)
-agents: [LLMSecurityAgent, AppReviewAgent, AuthAgent, IDORAgent, SSRFAgent, XSSAgent, APIAgent, FileUploadAgent]
+agents: [LLMSecurityAgent, AIAgentExploitationAgent, AppReviewAgent, AuthAgent, IDORAgent, SSRFAgent, XSSAgent, APIAgent, FileUploadAgent, ValidatorAgent, ExploitChainAgent]
 tools: [dev-browser, burp-bridge, credential-vault]
 skills_invoked: [PromptInjection, WebAssessment]
 ---

@@ -32,8 +32,8 @@ TypeScript tools go in `skills/BugBountyFramework/Tools/`. Requirements:
 ## Development Setup
 
 ```bash
-git clone https://github.com/h4ckologic/bughunter-ai.git
-cd bughunter-ai
+git clone https://github.com/h4ckologic/PiRanha.git
+cd PiRanha
 ./install.sh
 ```
 

@@ -2,7 +2,7 @@
 name: W_HUNT_CLOUD
 description: Cloud infrastructure security assessment for AWS, Azure, and GCP
 trigger: Cloud environment, AWS account, Azure subscription, or GCP project detected
-agents: [ReconAgent, AuthAgent, RCEAgent, SSRFAgent, IDORAgent]
+agents: [ReconAgent, CloudExploitationAgent, AWSAgent, AzureAgent, GCPAgent, KubernetesAgent, AuthAgent, SupplyChainAgent, SecretsExposureAgent, RCEAgent, SSRFAgent, IDORAgent, ValidatorAgent, ExploitChainAgent]
 tools: [credential-vault]
 skills_invoked: [CloudSecurity]
 ---

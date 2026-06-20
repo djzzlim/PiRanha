@@ -2,7 +2,7 @@
 name: W_HUNT_NETWORK
 description: Network infrastructure and Active Directory security assessment
 trigger: IP range, CIDR, or internal network target detected
-agents: [ReconAgent, WindowsAgent, AuthAgent, RCEAgent, ExploitDevAgent]
+agents: [ReconAgent, NetworkServiceAgent, ActiveDirectoryAgent, WindowsAgent, LateralMovementAgent, AuthAgent, RCEAgent, ExploitDevAgent, ValidatorAgent, ExploitChainAgent]
 tools: [burp-bridge, credential-vault]
 skills_invoked: [NetworkSecurity]
 ---

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" role="img" aria-label="PiRanha - Autonomous Bug-Bounty Swarm">
+  <title>PiRanha - Autonomous Bug-Bounty Swarm</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#02080d"/>
+      <stop offset="0.5" stop-color="#06222b"/>
+      <stop offset="1" stop-color="#01060a"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10e0cf"/>
+      <stop offset="0.55" stop-color="#0a7d8c"/>
+      <stop offset="1" stop-color="#0a2030"/>
+    </linearGradient>
+    <linearGradient id="belly" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff5a4d"/>
+      <stop offset="1" stop-color="#7a1020"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.4" stop-color="#ff3b30"/>
+      <stop offset="1" stop-color="#5a0a08"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <g id="fish">
+      <polygon points="360,110 300,45 240,38 150,70 95,72 22,42 72,118 22,198 98,158 175,205 285,202 360,150"
+               fill="url(#body)" stroke="#10e0cf" stroke-opacity="0.55" stroke-width="2"/>
+      <polygon points="235,40 160,58 205,8" fill="#0a6f7d"/>
+      <polygon points="200,205 150,235 235,210" fill="#0a6f7d"/>
+      <polygon points="180,205 290,200 330,172 180,188" fill="url(#belly)" opacity="0.85"/>
+      <polygon points="362,114 374,121 362,126 374,133 362,138 374,145 360,150" fill="#eafdff"/>
+      <circle cx="318" cy="92" r="9" fill="url(#eye)"/>
+    </g>
+  </defs>
+
+  <rect width="1280" height="420" fill="url(#bg)"/>
+  <g fill="#10e0cf" opacity="0.05" font-family="monospace" font-size="15">
+    <text x="40" y="60">01001000</text>
+    <text x="1060" y="90">11010 0x1F</text>
+    <text x="900" y="380">SSRF-&gt;IMDS</text>
+    <text x="60" y="395">$(id)</text>
+    <text x="1130" y="300">CVSS 9.8</text>
+  </g>
+
+  <use href="#fish" transform="translate(30,55) scale(0.5)" opacity="0.22"/>
+  <use href="#fish" transform="translate(60,250) scale(0.4)" opacity="0.18"/>
+  <use href="#fish" transform="translate(55,95) scale(1.05)" filter="url(#glow)"/>
+
+  <text x="540" y="205" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="116" font-weight="800" fill="#eafdff" letter-spacing="-2">Pi<tspan fill="#10e0cf">Ranha</tspan></text>
+  <text x="546" y="250" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="7" fill="#7fb6c2">AUTONOMOUS BUG-BOUNTY SWARM</text>
+  <text x="546" y="298" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#5f8a96">53 specialized AI agents &#183; web &#183; api &#183; llm &#183; cloud &#183; mobile &#183; binary &#183; network</text>
+  <text x="546" y="356" font-family="'SFMono-Regular', Consolas, monospace" font-size="16" fill="#10e0cf">$ pi install git:github.com/h4ckologic/PiRanha</text>
+</svg>

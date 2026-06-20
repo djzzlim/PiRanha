@@ -4,8 +4,10 @@ This project is a Claude Code skill for autonomous bug bounty hunting.
 
 ## Key Files
 - `skills/BugBountyFramework/SKILL.md` — Main skill definition (loaded by Claude Code)
-- `skills/BugBountyFramework/Agents/*.md` — 20 specialized vulnerability agents
+- `skills/BugBountyFramework/Agents/*.md` — 53 specialized agents (51 hunters/specialists + ValidatorAgent + ExploitChainAgent)
 - `skills/BugBountyFramework/Tools/*.ts` — TypeScript tools (Bun runtime)
+- `skills/BugBountyFramework/Tools/agent-router.ts` — engagement type → ordered, dependency-aware agent deployment plan
+- `package.json` — Pi package manifest (`pi.skills`); this repo is the **PiRanha** Pi package and installs the skill as `piranha` via `pi install git:github.com/h4ckologic/PiRanha`
 
 ## How It Works
 When a user types `hunt <target>`, Claude Code loads SKILL.md which orchestrates a 10-phase hunt:

@@ -1,5 +1,5 @@
 ---
-name: BugBountyFramework
+name: piranha
 description: Autonomous agentic bug bounty hunting framework v2.0. BugHunter orchestrator with state-machine-driven phases, credential vault, auth flow automation, intelligent skill routing, Burp MCP bridge, parallel agent execution, LLM/AI target track, configurable severity profiles, and live dashboard. USE WHEN bug bounty, bounty hunt, hunt for bugs, autonomous security testing, find vulnerabilities, bughunter, hunt target, assess program, zero day research, critical vulnerabilities, autonomous pentest, continuous bug bounty, hunt.
 ---
 
@@ -14,7 +14,7 @@ curl -s -X POST http://localhost:8888/notify \
 
 ---
 
-# BugHunterFramework v2.0 — Autonomous Bug Bounty Intelligence System
+# PiRanha — Autonomous Bug Bounty Intelligence System (BugHunter v2.0 engine)
 
 > **BugHunter** is an elite autonomous security researcher. Core philosophy: **understand before you attack**. Every hunt is driven by a state machine that tracks phases, persists progress, and never loses context. Credentials are vaulted, auth flows are automated, agents run in true parallel, and AI targets get first-class treatment. Learns from every engagement.
 
@@ -350,36 +350,76 @@ READ AppProfile → EXTRACT hypotheses → DEPLOY targeted agents
 ATTACK SURFACE → AGENT SELECTION:
 
 Web Application detected?
-  → XSSAgent, SQLiAgent, SSRFAgent, IDORAgent, AuthAgent, FileUploadAgent, CORSAgent
+  → XSSAgent, SQLiAgent, NoSQLiAgent, SSRFAgent, IDORAgent, AuthAgent, OAuthAgent, FileUploadAgent, CORSAgent, OpenRedirectAgent, CRLFAgent, SecretsExposureAgent
+
+Injection sinks present (templating, OS exec, serialization, file paths)?
+  → SSTIAgent, CommandInjectionAgent, DeserializationAgent, PathTraversalAgent, RCEAgent
 
 API (REST/GraphQL/gRPC) detected?
-  → APIAgent, IDORAgent, AuthAgent, SSRFAgent
+  → APIAgent, IDORAgent, AuthAgent, OAuthAgent, SSRFAgent, NoSQLiAgent
   → AUTO-INVOKE: APISecurityTesting skill
 
-Mobile (APK/IPA provided)?
-  → MobileAgent (Android or iOS track)
+Mobile app — Android (.apk)?
+  → AndroidAgent (components, WebView, storage, pinning/root bypass) + APIAgent (backend) + ReverseEngineeringAgent (native .so)
+  → AUTO-INVOKE: MobileSecurity skill
+
+Mobile app — iOS (.ipa)?
+  → iOSAgent (Mach-O, keychain, URL schemes, pinning/jailbreak bypass) + APIAgent (backend)
   → AUTO-INVOKE: MobileSecurity skill
 
 AI/LLM features detected? (ENH-8)
   → LLMSecurityAgent (system prompt extraction, cross-user data, RAG poisoning)
   → AUTO-INVOKE: PromptInjection skill
 
-Windows/AD environment?
-  → WindowsAgent
+AI AGENT with tool/function/MCP access detected? (ENH-11)
+  → AIAgentExploitationAgent (indirect injection → tool call, MCP poisoning, excessive agency)
+
+Network / internal / Active Directory environment?
+  → NetworkServiceAgent (service exploitation), ActiveDirectoryAgent (Kerberos/ADCS/relay), WindowsAgent (host priv-esc), LateralMovementAgent (pivoting/PtH), ExploitDevAgent
   → AUTO-INVOKE: NetworkSecurity skill
 
-Binary / native app target?
-  → ReverseEngineeringAgent → ExploitDevAgent pipeline
+Cloud-hosted / IMDS / container / k8s surface?
+  → CloudExploitationAgent (entry/pivot: SSRF/leaked-cred → cloud session), then provider-deep:
+    AWS → AWSAgent | Azure → AzureAgent | GCP → GCPAgent | Kubernetes → KubernetesAgent
+  → AUTO-INVOKE: CloudSecurity skill
 
-Authentication system present?
-  → AuthAgent, IDORAgent (ALWAYS)
+Source / dependency / CI-CD surface (repos, package manifests, pipelines)?
+  → SupplyChainAgent, SecretsExposureAgent
+
+Binary / native app target?
+  → ReverseEngineeringAgent (understand) → MemoryCorruptionAgent (fuzz/triage) → ExploitDevAgent (weaponize)
+
+Firmware / embedded / IoT image or device?
+  → FirmwareAgent (extract/analyze) → ReverseEngineeringAgent → MemoryCorruptionAgent → ExploitDevAgent
+
+Authentication / federated identity (OAuth/OIDC/SAML/SSO) present?
+  → AuthAgent, OAuthAgent, IDORAgent (ALWAYS)
 
 File upload functionality?
-  → FileUploadAgent, XXEAgent
+  → FileUploadAgent, XXEAgent, PathTraversalAgent
 
 Rich application logic?
   → BusinessLogicAgent
+
+ALWAYS (post-processing, after hunter agents report):
+  → ValidatorAgent (reproduce + de-dup + CVSS 3.1/4.0 gate) → ExploitChainAgent (correlate into kill chains)
 ```
+
+### 5A.1: Deterministic Engagement Router (ENH-12)
+
+The surface→agent map above is the human-readable view of `Tools/agent-router.ts` — the single source of truth the orchestrator queries to get an ordered, dependency-aware deployment plan per engagement type:
+
+```bash
+# Which agents, in what order, with what parallelism, for this engagement?
+bun ~/.claude/skills/BugBountyFramework/Tools/agent-router.ts --engagement web
+bun agent-router.ts --engagement cloud-aws --json     # machine-readable plan for the orchestrator
+bun agent-router.ts --list                            # all engagement types + aliases
+bun agent-router.ts --validate                        # every routed agent resolves to an Agents/*.md file
+```
+
+Engagement types: `web, api, llm, android, ios, mobile, binary, firmware, thick-client, cloud, cloud-aws, cloud-azure, cloud-gcp, kubernetes, network, recon` (aliases: `apk→android, ipa→ios, aws→cloud-aws, k8s→kubernetes, ad→network`, …).
+
+Each plan runs as ordered GROUPS: agents inside a group fire in parallel (Agent tool, `run_in_background`, capped by `--max-parallel`); the next group only starts once the current group reports — encoding `profile/recon → auth → hunters → VALIDATE (ValidatorAgent) → CHAIN (ExploitChainAgent)`.
 
 ### 5B: Finding-Triggered Escalation (ENH-5)
 
@@ -557,6 +597,8 @@ sqlmap -m /tmp/bb-params.txt \
 ### 8A: CVSS Filter & Deduplication (ENH-9)
 
 Filtering is now MODE-DEPENDENT, not hardcoded:
+**Owner: `ValidatorAgent`** — it consumes the `/tmp/bb-findings-*.json` bus, reproduces each finding in a clean session, kills false positives, dedups by root cause, computes CVSS 3.1 + 4.0, and applies the mode gate below. Only `decision: report` findings move forward.
+
 
 ```python
 def should_report(finding, mode):
@@ -597,7 +639,7 @@ CHAIN ANALYSIS:
 - Medium API key exposure + Low excessive permissions = High data access
 ```
 
-Invoke OffensiveSecurityOrchestrator for correlation analysis.
+**Owner: `ExploitChainAgent`** — builds the finding graph, correlates individually-low findings into critical end-to-end kill chains, maps each step to MITRE ATT&CK, and elevates combined CVSS to true blast radius. Invoke OffensiveSecurityOrchestrator for supplementary correlation.
 
 ### 8C: Update Intelligence Base
 
@@ -695,19 +737,19 @@ curl -s -X POST http://localhost:8888/notify \
 
 The orchestrator classifies the target and dispatches the appropriate workflow from `Workflows/`. Each workflow defines its own phases, agent dispatch order, parallelism, and gate conditions.
 
-| Input | Track | Workflow | Agents (28 total) | Tools | Skills Invoked |
+| Input | Track | Workflow | Agents (53 total) | Tools | Skills Invoked |
 |-------|-------|----------|-------------------|-------|----------------|
-| Web app URL | Web | `W_HUNT_WEB` | AppReview+XSS+SQLi+SSRF+IDOR+Auth+CORS+CSRF+FileUpload+XXE+RCE+BusinessLogic+RaceCondition+CachePoisoning+HTTPSmuggling+PrototypePollution+SubdomainTakeover+GraphQL+WebSocket | dev-browser+Burp+nuclei+sqlmap+ffuf | WebAssessment, Recon |
-| API endpoint/swagger | API | `W_HUNT_API` | API+GraphQL+WebSocket+Auth+IDOR+SQLi+RCE+SSRF+RaceCondition+BusinessLogic | Burp+nuclei+ffuf+graphql-cop | APISecurityTesting |
-| AI/LLM application | AI | `W_HUNT_LLM` | LLMSecurity+AppReview+Auth+IDOR+SSRF+XSS+API+FileUpload | dev-browser+Burp+garak | PromptInjection, WebAssessment |
-| .apk file | Android | `W_HUNT_MOBILE` | Mobile+API+Auth+IDOR+ReverseEngineering+SSRF+SQLi | Appium+Burp+apktool+frida+objection | MobileSecurity |
-| .ipa file | iOS | `W_HUNT_MOBILE` | Mobile+API+Auth+IDOR+ReverseEngineering+SSRF+SQLi | Appium+Burp+objection+frida | MobileSecurity |
-| IP range/CIDR | Network | `W_HUNT_NETWORK` | Recon+Windows+Auth+RCE+ExploitDev | nmap+impacket+crackmapexec+BloodHound | NetworkSecurity |
-| Cloud account | Cloud | `W_HUNT_CLOUD` | Recon+Auth+RCE+SSRF+IDOR | Pacu+ScoutSuite+Prowler+CloudFox | CloudSecurity |
-| Electron/desktop app | Desktop | `W_HUNT_THICK_CLIENT` | DesktopApp+ReverseEngineering+Auth+API+SQLi+RCE | dnSpy+Ghidra+x64dbg+Burp | ReverseEngineering |
-| .NET/Java application | Managed | `W_HUNT_THICK_CLIENT` | DesktopApp+ReverseEngineering+Auth+API+SQLi+RCE | dnSpy+jadx+ysoserial+Burp | ReverseEngineering |
-| Recon-only request | Recon | `W_RECON` | Recon+SubdomainTakeover | subfinder+httpx+nuclei+gowitness | Recon, OSINT |
-| Full program | All | `W_HUNT_WEB` (primary) + supplemental workflows | All 28 agents | All tools | SecurityHub routes |
+| Web app URL | Web | `W_HUNT_WEB` | AppReview+XSS+SQLi+NoSQLi+SSRF+IDOR+Auth+OAuth+CORS+CSRF+FileUpload+XXE+RCE+SSTI+CommandInjection+Deserialization+PathTraversal+OpenRedirect+CRLF+SecretsExposure+BusinessLogic+RaceCondition+CachePoisoning+HTTPSmuggling+PrototypePollution+SubdomainTakeover+GraphQL+WebSocket | dev-browser+Burp+nuclei+sqlmap+ffuf | WebAssessment, Recon |
+| API endpoint/swagger | API | `W_HUNT_API` | API+GraphQL+WebSocket+Auth+OAuth+IDOR+SQLi+NoSQLi+RCE+CommandInjection+Deserialization+SSRF+CRLF+RaceCondition+BusinessLogic | Burp+nuclei+ffuf+graphql-cop | APISecurityTesting |
+| AI/LLM application | AI | `W_HUNT_LLM` | LLMSecurity+AIAgentExploitation+AppReview+Auth+IDOR+SSRF+XSS+API+FileUpload | dev-browser+Burp+garak | PromptInjection, WebAssessment |
+| .apk file | Android | `W_HUNT_MOBILE` | AppReview+Android+API+Auth+OAuth+IDOR+ReverseEngineering+SSRF+SecretsExposure | Appium+Burp+apktool+jadx+frida+objection+MobSF+drozer | MobileSecurity |
+| .ipa file | iOS | `W_HUNT_MOBILE` | AppReview+iOS+API+Auth+OAuth+IDOR+ReverseEngineering+SSRF+SecretsExposure | Appium+Burp+frida+objection+class-dump+MobSF | MobileSecurity |
+| IP range/CIDR | Network | `W_HUNT_NETWORK` | Recon+NetworkService+ActiveDirectory+Windows+LateralMovement+ExploitDev | nmap+netexec+impacket+BloodHound+Certipy+ligolo-ng | NetworkSecurity |
+| Cloud account | Cloud | `W_HUNT_CLOUD` | Recon+CloudExploitation+AWS+Azure+GCP+Kubernetes+SupplyChain+SecretsExposure | Pacu+ScoutSuite+Prowler+CloudFox+ROADtools+kube-hunter | CloudSecurity |
+| Electron/desktop app | Desktop | `W_HUNT_THICK_CLIENT` | DesktopApp+ReverseEngineering+MemoryCorruption+Firmware+Auth+API+SQLi+RCE+Deserialization+CommandInjection | dnSpy+Ghidra+x64dbg+AFL++ +binwalk+Burp | ReverseEngineering |
+| .NET/Java application | Managed | `W_HUNT_THICK_CLIENT` | DesktopApp+ReverseEngineering+Auth+API+SQLi+RCE+Deserialization | dnSpy+jadx+ysoserial+Burp | ReverseEngineering |
+| Recon-only request | Recon | `W_RECON` | Recon+SubdomainTakeover+SecretsExposure | subfinder+httpx+nuclei+gowitness | Recon, OSINT |
+| Full program | All | `W_HUNT_WEB` (primary) + supplemental workflows | All 53 agents; agent-router.ts plans deployment, ValidatorAgent + ExploitChainAgent run post-processing on every track | All tools | SecurityHub routes |
 
 ### Workflow Files
 
@@ -731,6 +773,7 @@ Workflows/
 |-------|---------------|------|
 | Target Classification | `SecurityHub` | Always — classifies target, recommends methodology |
 | Methodology Selection | `OffensiveSecurityOrchestrator` | Always — selects approach, tracks kill chain |
+| Agent selection | `agent-router.ts` (ENH-12) | Always — maps engagement type → ordered, dependency-aware agent deployment plan |
 | Recon | `Recon` | Asset discovery, subdomain enumeration |
 | Web assessment | `WebAssessment` | OWASP WSTG v5 testing |
 | API testing | `APISecurityTesting` | REST/GraphQL/gRPC endpoints |
@@ -742,8 +785,8 @@ Workflows/
 | Cloud assets | `CloudSecurity` | Cloud infrastructure |
 | OSINT | `OSINT` | Intelligence gathering |
 | Threat model | `ThreatModeling` | Complex applications |
-| Chain analysis | `OffensiveSecurityOrchestrator` | Finding correlation (ENH-5) |
-| Finding validation | `Council` (optional) | Debate real vs false positive |
+| Chain analysis | `ExploitChainAgent` + `OffensiveSecurityOrchestrator` | Finding correlation into kill chains (ENH-5) |
+| Finding validation | `ValidatorAgent` (Council optional for disputes) | Reproduce, de-dup, CVSS 3.1/4.0, mode gate |
 
 ---
 
@@ -752,6 +795,7 @@ Workflows/
 | Tool | File | Purpose |
 |------|------|---------|
 | **Hunt Orchestrator** | `Tools/hunt-orchestrator.ts` | State machine, phase tracking, session management |
+| **Agent Router** | `Tools/agent-router.ts` | Engagement type → ordered agent deployment plan (groups, parallelism, deps); `--validate` guards against dangling agent refs |
 | **Credential Vault** | `Tools/credential-vault.ts` | Secure credential storage, 1Password integration, auto-redaction |
 | **Auth Manager** | `Tools/auth-manager.ts` | B2C/SSO/OAuth automation, session persistence, auto-refresh |
 | **Burp Bridge** | `Tools/burp-bridge.ts` | Burp health check, scope sync, traffic export, Collaborator polling |
@@ -791,6 +835,31 @@ Workflows/
 | **SubdomainTakeoverAgent** | `Agents/SubdomainTakeoverAgent.md` | Dangling DNS, cloud service takeover, cookie scope impact |
 | **RaceConditionAgent** | `Agents/RaceConditionAgent.md` | Single-packet attack, limit bypass, double-spend, TOCTOU |
 | **PrototypePollutionAgent** | `Agents/PrototypePollutionAgent.md` | Client-side PP→XSS gadgets, server-side PP→RCE chains |
+| **SSTIAgent** | `Agents/SSTIAgent.md` | Server-side template injection — per-engine RCE (Jinja2/Twig/Freemarker/Velocity/Handlebars/ERB/Razor/Go) |
+| **CommandInjectionAgent** | `Agents/CommandInjectionAgent.md` | OS command injection — blind/OOB, argument injection, WAF bypass |
+| **DeserializationAgent** | `Agents/DeserializationAgent.md` | Insecure deserialization — Java/.NET/PHP/Python/Ruby/Node gadget chains |
+| **NoSQLiAgent** | `Agents/NoSQLiAgent.md` | NoSQL injection — operator/JS injection, auth bypass (Mongo/Couch/Redis/ES) |
+| **PathTraversalAgent** | `Agents/PathTraversalAgent.md` | Path traversal / LFI / RFI → RCE (wrappers, log poisoning, zip-slip) |
+| **CRLFAgent** | `Agents/CRLFAgent.md` | CRLF / HTTP response splitting / header & email injection |
+| **OAuthAgent** | `Agents/OAuthAgent.md` | OAuth2/OIDC/SAML/SSO — redirect_uri abuse, SAML XSW, jku/x5u SSRF |
+| **OpenRedirectAgent** | `Agents/OpenRedirectAgent.md` | Open redirect as chain primitive — OAuth token theft, SSRF allow-list bypass |
+| **SecretsExposureAgent** | `Agents/SecretsExposureAgent.md` | Exposed .git/.env/source-maps/debug endpoints, validated live secrets |
+| **CloudExploitationAgent** | `Agents/CloudExploitationAgent.md` | Cloud/IAM/IMDS/k8s/container priv-esc post-foothold |
+| **SupplyChainAgent** | `Agents/SupplyChainAgent.md` | Dependency confusion, CI/CD (PPE), leaked tokens, vuln deps |
+| **AIAgentExploitationAgent** | `Agents/AIAgentExploitationAgent.md` | Agentic-AI / tool-calling / MCP exploitation (MITRE ATLAS) |
+| **ValidatorAgent** | `Agents/ValidatorAgent.md` | Finding validation/triage — reproduce, de-dup, CVSS 3.1/4.0, FP killer |
+| **ExploitChainAgent** | `Agents/ExploitChainAgent.md` | Attack-chain correlation & weaponization, MITRE ATT&CK kill chains |
+| **AndroidAgent** | `Agents/AndroidAgent.md` | Android: exported components, WebView RCE, storage, deep-link hijack, SSL-pinning/root bypass |
+| **iOSAgent** | `Agents/iOSAgent.md` | iOS: Mach-O, keychain, URL schemes, WKWebView, jailbreak/pinning/biometric bypass |
+| **MemoryCorruptionAgent** | `Agents/MemoryCorruptionAgent.md` | Native bug discovery — fuzzing (AFL++/libFuzzer), sanitizers, crash triage, exploitability |
+| **FirmwareAgent** | `Agents/FirmwareAgent.md` | Firmware/IoT — extraction, secret/backdoor mining, emulation, U-Boot, hardware (UART/JTAG/SPI) |
+| **AWSAgent** | `Agents/AWSAgent.md` | AWS IAM priv-esc paths, S3/Lambda/Cognito/Secrets, snapshot exfil, CloudTrail evasion |
+| **AzureAgent** | `Agents/AzureAgent.md` | Entra ID, managed identities, Key Vault, Storage SAS, Automation runbooks, consent phishing |
+| **GCPAgent** | `Agents/GCPAgent.md` | GCP SA impersonation, IAM priv-esc, GCS, Functions/Run, metadata, GKE workload identity |
+| **KubernetesAgent** | `Agents/KubernetesAgent.md` | k8s RBAC priv-esc, exposed API/kubelet/etcd, SA-token abuse, container/node escape |
+| **ActiveDirectoryAgent** | `Agents/ActiveDirectoryAgent.md` | Kerberoast/AS-REP, delegation, ACL abuse, DCSync, ADCS ESC1-13, NTLM coercion+relay |
+| **NetworkServiceAgent** | `Agents/NetworkServiceAgent.md` | Service enum+exploit (SMB/RDP/SNMP/DB/printers), default creds, version→CVE |
+| **LateralMovementAgent** | `Agents/LateralMovementAgent.md` | PtH/PtT/PtK, remote exec, credential harvesting, tunneling/pivoting (ligolo/chisel) |
 
 ---
 

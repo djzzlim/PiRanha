@@ -2,7 +2,7 @@
 name: W_HUNT_API
 description: Comprehensive API security assessment (REST, GraphQL, gRPC, WebSocket)
 trigger: API endpoint, Swagger/OpenAPI spec, or GraphQL endpoint detected
-agents: [APIAgent, GraphQLAgent, WebSocketAgent, AuthAgent, IDORAgent, SQLiAgent, RCEAgent, SSRFAgent, RaceConditionAgent, BusinessLogicAgent]
+agents: [APIAgent, GraphQLAgent, WebSocketAgent, AuthAgent, OAuthAgent, IDORAgent, SQLiAgent, NoSQLiAgent, RCEAgent, CommandInjectionAgent, DeserializationAgent, SSRFAgent, CRLFAgent, RaceConditionAgent, BusinessLogicAgent, ValidatorAgent, ExploitChainAgent]
 tools: [dev-browser, burp-bridge, credential-vault]
 skills_invoked: [APISecurityTesting]
 ---

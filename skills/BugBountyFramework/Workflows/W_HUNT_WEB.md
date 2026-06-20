@@ -2,7 +2,7 @@
 name: W_HUNT_WEB
 description: Comprehensive web application security assessment
 trigger: Web application URL detected
-agents: [AppReviewAgent, XSSAgent, SQLiAgent, SSRFAgent, IDORAgent, AuthAgent, CORSAgent, FileUploadAgent, XXEAgent, RCEAgent, BusinessLogicAgent, CSRFAgent, CachePoisoningAgent, HTTPSmugglingAgent, RaceConditionAgent, PrototypePollutionAgent, GraphQLAgent, WebSocketAgent]
+agents: [AppReviewAgent, XSSAgent, SQLiAgent, NoSQLiAgent, SSRFAgent, IDORAgent, AuthAgent, OAuthAgent, CORSAgent, FileUploadAgent, XXEAgent, RCEAgent, SSTIAgent, CommandInjectionAgent, DeserializationAgent, PathTraversalAgent, OpenRedirectAgent, CRLFAgent, SecretsExposureAgent, BusinessLogicAgent, CSRFAgent, CachePoisoningAgent, HTTPSmugglingAgent, RaceConditionAgent, PrototypePollutionAgent, GraphQLAgent, WebSocketAgent, ValidatorAgent, ExploitChainAgent]
 tools: [dev-browser, burp-bridge, credential-vault, auth-manager]
 skills_invoked: [WebAssessment, Recon]
 ---

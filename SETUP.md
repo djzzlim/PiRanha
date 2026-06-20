@@ -314,8 +314,8 @@ Ensure `settings.json` has:
 
 ```bash
 # Clone the BugHunter AI repo
-git clone https://github.com/h4ckologic/bughunter-ai.git
-cd bughunter-ai
+git clone https://github.com/h4ckologic/PiRanha.git
+cd PiRanha
 
 # Run the installer
 ./install.sh
@@ -774,7 +774,7 @@ These 16 security skills are installed automatically with PAI:
 ls ~/.claude/skills/BugBountyFramework/SKILL.md
 
 # If missing, reinstall
-cd bughunter-ai
+cd PiRanha
 cp -r skills/BugBountyFramework ~/.claude/skills/BugBountyFramework
 ```
 

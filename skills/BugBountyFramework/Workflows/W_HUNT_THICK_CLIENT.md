@@ -2,7 +2,7 @@
 name: W_HUNT_THICK_CLIENT
 description: Desktop application and thick client security assessment
 trigger: Desktop application (Electron, .NET, Java, native) detected
-agents: [DesktopAppAgent, ReverseEngineeringAgent, AuthAgent, APIAgent, SQLiAgent, RCEAgent]
+agents: [DesktopAppAgent, ReverseEngineeringAgent, MemoryCorruptionAgent, FirmwareAgent, AuthAgent, APIAgent, SQLiAgent, RCEAgent, DeserializationAgent, CommandInjectionAgent, ValidatorAgent, ExploitChainAgent]
 tools: [burp-bridge, credential-vault]
 skills_invoked: [ReverseEngineering]
 ---
