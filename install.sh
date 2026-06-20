@@ -5,7 +5,7 @@ set -e
 # Usage: curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh
 #
 # Options:
-#   --source       Install from source via bun (installs bun if needed)
+#   --source       Build from source via bun (installs bun if needed)
 #   --binary       Always install the prebuilt binary
 #   --ref <ref>    Install a specific tag/commit/branch
 #   -r <ref>       Shorthand for --ref
@@ -94,8 +94,15 @@ install_bun() {
     require_bun_version
 }
 
-install_via_bun() {
-    echo "Installing piranha from source via bun..."
+check_path() {
+    case ":$PATH:" in
+        *":$INSTALL_DIR:"*) : ;;
+        *) printf "\n${BOLD}NOTE:${NC} ${INSTALL_DIR} is not on your PATH. Add it:\n  export PATH=\"${INSTALL_DIR}:\$PATH\"\n" ;;
+    esac
+}
+
+install_from_source() {
+    echo "Building piranha from source via bun..."
     has_git || { echo "git is required for the source install"; exit 1; }
 
     TMP_DIR="$(mktemp -d)"
@@ -114,8 +121,14 @@ install_via_bun() {
 
     [ -f "$TMP_DIR/cli/piranha.ts" ] || { echo "Expected launcher at ${TMP_DIR}/cli/piranha.ts"; exit 1; }
 
-    bun install -g "$TMP_DIR" || { echo "Failed to install from source"; exit 1; }
-    printf "\n${GREEN}✓ Installed piranha via bun${NC}\n"
+    mkdir -p "$INSTALL_DIR"
+    echo "Compiling piranha -> ${INSTALL_DIR}/piranha ..."
+    ( cd "$TMP_DIR" && bun build ./cli/piranha.ts --compile --outfile "${INSTALL_DIR}/piranha" ) \
+        || { echo "Compile failed"; exit 1; }
+    chmod +x "${INSTALL_DIR}/piranha"
+    printf "\n${GREEN}✓ Compiled and installed piranha to ${INSTALL_DIR}/piranha${NC}\n"
+
+    check_path
 }
 
 install_binary() {
@@ -151,17 +164,14 @@ install_binary() {
     chmod +x "${INSTALL_DIR}/piranha"
     printf "\n${GREEN}✓ Installed piranha to ${INSTALL_DIR}/piranha${NC}\n"
 
-    case ":$PATH:" in
-        *":$INSTALL_DIR:"*) : ;;
-        *) printf "${BOLD}Add ${INSTALL_DIR} to your PATH:${NC}\n  export PATH=\"${INSTALL_DIR}:\$PATH\"\n" ;;
-    esac
+    check_path
 }
 
 case "$MODE" in
     source)
         has_bun || install_bun
         require_bun_version
-        install_via_bun
+        install_from_source
         ;;
     binary)
         install_binary
@@ -169,7 +179,7 @@ case "$MODE" in
     *)
         if has_bun; then
             require_bun_version
-            install_via_bun
+            install_from_source
         else
             install_binary
         fi

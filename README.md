@@ -81,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh 
 curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh -s -- --ref v2.0.0
 ```
 
-The installer drops `piranha` into `~/.local/bin` (prebuilt binary) or installs it with `bun install -g` from source. Then wire the swarm into your harness and hunt:
+The installer drops a self-contained `piranha` into `~/.local/bin` — either the prebuilt release binary, or compiled on the spot from source with bun (`bun build --compile`). Then wire the swarm into your harness and hunt:
 
 ```sh
 piranha doctor                 # check prerequisites + harness
@@ -573,7 +573,7 @@ PiRanha/
 └── .github/workflows/release.yml  # cross-platform binary release on tag
 
 # Installed state (created on install / first run)
-~/.local/bin/piranha               # the binary (or via `bun install -g`)
+~/.local/bin/piranha               # the compiled binary
 ~/.claude/skills/BugBountyFramework/   # skill copy, for Claude Code (`piranha install`)
 ~/.claude/MEMORY/BugBounty/
 ├── Sessions/                      # per-hunt state machine + event log (--resume)

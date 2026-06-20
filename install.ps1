@@ -50,9 +50,14 @@ function Install-ViaBun {
             git clone --depth 1 "https://github.com/$Repo.git" $tmp
         }
         if (-not (Test-Path (Join-Path $tmp "cli\piranha.ts"))) { throw "Expected launcher at $tmp\cli\piranha.ts" }
-        bun install -g $tmp
-        if ($LASTEXITCODE -ne 0) { throw "Failed to install from source." }
-        Write-Host "`nInstalled piranha via bun" -ForegroundColor Green
+        New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+        $dest = Join-Path $InstallDir "piranha.exe"
+        Write-Host "Compiling piranha -> $dest ..."
+        Push-Location $tmp
+        try { bun build .\cli\piranha.ts --compile --outfile $dest } finally { Pop-Location }
+        if ($LASTEXITCODE -ne 0) { throw "Compile failed." }
+        Write-Host "`nCompiled and installed piranha to $dest" -ForegroundColor Green
+        if ($env:PATH -notlike "*$InstallDir*") { Write-Host "Add $InstallDir to your PATH." -ForegroundColor Yellow }
     } finally {
         if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
     }
