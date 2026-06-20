@@ -103,7 +103,7 @@ piranha hunt https://app.example.com --mode pentest
 
 | Command | Does |
 |---|---|
-| `piranha hunt <target>` | Classify + launch a hunt (`--mode`, `--engagement`, `--creds`, `--harness`, `--resume`, `--dry-run`) |
+| `piranha hunt <target>` | Classify + launch a hunt (`--mode`, `--engagement`, `--instructions`/`--brief`, `--out`, `--burp`/`--proxy`, `--creds`, `--harness`, `--resume`, `--dry-run`) |
 | `piranha status [target]` | Live hunt dashboard, or list all sessions |
 | `piranha plan <target\|type>` | Print the deterministic agent deployment plan |
 | `piranha agents [type]` | List routed agents (all, or per engagement) |
@@ -122,6 +122,28 @@ eval "$(piranha completions zsh)"     # zsh  → add to ~/.zshrc
 eval "$(piranha completions bash)"    # bash → add to ~/.bashrc
 piranha completions fish > ~/.config/fish/completions/piranha.fish
 ```
+
+### Operator instructions & custom directives
+
+Anything you append is forwarded to the swarm **verbatim** — a one-off brief inline, from a file, or as trailing words after the target. It rides on top of the routed plan as overriding guidance:
+
+```sh
+# long brief from a file (recommended for multi-line directives)
+piranha hunt https://app.example.com --engagement llm --burp --out . --brief brief.md
+
+# inline
+piranha hunt https://app.example.com --engagement llm --burp --out . \
+  --instructions "Recon first (TLS, headers, dirsearch, nuclei), save artifacts here. Exercise the AI-agent surface: endpoint enum, agent-to-tool routing, NL-to-SQL probes, prompt injection & multi-turn context confusion, system-prompt extraction, markdown/HTML injection, trust boundaries between chained agents. Browser UA, no curl, reuse the logged-in Chrome tab. Finish with a 10-point update."
+```
+
+| Flag | Effect |
+|---|---|
+| `--instructions <txt>` / `--brief <file>` | Operator brief forwarded verbatim (overrides defaults); trailing words after the target also count |
+| `--out <dir>` | Store recon artifacts + report under `<dir>` (e.g. `--out .`) and recon-first |
+| `--burp` / `--proxy <url>` | Route all web + tool traffic through Burp (`127.0.0.1:8080`) or a custom proxy |
+| `--engagement llm` | Force the AI/LLM-agent track on a plain web URL |
+
+> The binary forwards these as **directives**; the swarm (the LLM in your harness) carries them out. Burp capture is real once traffic is routed to it; "no curl / browser UA / reuse the logged-in Chrome tab" are honored as instructions by the agents and the harness's browser tool — best-effort, not hard-enforced per individual tool.
 
 ### As a Pi package
 

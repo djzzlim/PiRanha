@@ -31,7 +31,7 @@ import {
 import { runCli as vaultCli } from "../skills/BugBountyFramework/Tools/credential-vault.ts";
 import { existsSync, mkdirSync, cpSync } from "fs";
 import { homedir, tmpdir } from "os";
-import { join } from "path";
+import { join, resolve } from "path";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -76,6 +76,7 @@ const BOOLEAN_FLAGS: Record<string, true> = {
   json: true,
   help: true,
   force: true,
+  burp: true,
 };
 
 interface ParsedArgs {
@@ -210,7 +211,13 @@ function buildKickoffPrompt(
   target: string,
   engagement: string,
   mode: HuntMode,
-  opts: { resume: boolean; creds?: string },
+  opts: {
+    resume: boolean;
+    creds?: string;
+    instructions?: string;
+    outDir?: string;
+    proxy?: string;
+  },
 ): string {
   const lines: string[] = [];
   lines.push(`hunt ${target} --mode ${mode}${opts.resume ? " --resume" : ""}`);
@@ -220,11 +227,38 @@ function buildKickoffPrompt(
   if (opts.creds) {
     lines.push(`Credentials reference: ${opts.creds}. Load them through the credential vault — never inline secrets in prompts, logs, or reports.`);
   }
+  if (opts.proxy) {
+    lines.push(`Proxy: route ALL web and tool traffic through ${opts.proxy} (Burp). Set every tool's proxy/upstream and the browser harness to use it — let nothing bypass the proxy.`);
+  }
+  if (opts.outDir) {
+    lines.push(`Artifacts: write every recon output, request/response log, screenshot, and report under ${opts.outDir}. Begin with full recon (TLS/SSL, HTTP headers, content discovery/dirsearch, nuclei) and save each tool's raw output there first.`);
+  }
   lines.push(
     `Drive the hunt-orchestrator state machine: profile the target first, then dispatch the routed agents in parallel per the deployment plan. ` +
       `Validate findings, kill false positives, correlate exploit chains, and don't stop until the hunt completes or the finding target is met.`,
   );
+  if (opts.instructions && opts.instructions.trim().length > 0) {
+    lines.push("");
+    lines.push("OPERATOR INSTRUCTIONS (follow exactly — these override the defaults above):");
+    lines.push(opts.instructions.trim());
+  }
   return lines.join("\n");
+}
+
+async function gatherInstructions(
+  flags: Record<string, string | boolean>,
+  positionals: string[],
+): Promise<string | undefined> {
+  const inline = str(flags, "instructions");
+  if (inline) return inline;
+  const brief = str(flags, "brief");
+  if (brief) {
+    const f = Bun.file(brief);
+    if (!(await f.exists())) die(`--brief file not found: ${brief}`);
+    return await f.text();
+  }
+  const trailing = positionals.slice(1).join(" ").trim();
+  return trailing.length > 0 ? trailing : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -259,6 +293,10 @@ async function cmdHunt(rest: string[]): Promise<number> {
   const resume = bool(flags, "resume");
   const dryRun = bool(flags, "dry-run") || bool(flags, "print");
   const creds = str(flags, "creds");
+  const outRaw = str(flags, "out");
+  const outDir = outRaw ? resolve(outRaw) : undefined;
+  const proxy = str(flags, "proxy") ?? (bool(flags, "burp") ? "http://127.0.0.1:8080" : undefined);
+  const instructions = await gatherInstructions(flags, positionals);
 
   // --status: report and exit
   if (bool(flags, "status")) {
@@ -295,7 +333,7 @@ async function cmdHunt(rest: string[]): Promise<number> {
   console.log("");
 
   // Launch the harness
-  const prompt = buildKickoffPrompt(target!, engagement, mode, { resume, creds });
+  const prompt = buildKickoffPrompt(target!, engagement, mode, { resume, creds, instructions, outDir, proxy });
   const harness = detectHarness(str(flags, "harness"));
 
   if (dryRun || !harness) {
@@ -630,7 +668,7 @@ function cmdCompletions(rest: string[]): number {
   const shell = positionals[0];
   const engagements = [...Object.keys(ENGAGEMENTS), ...Object.keys(ALIASES)].join(" ");
   const cmds = "hunt status plan agents engagements tools vault install update doctor completions version help";
-  const flags = "--mode --engagement --creds --harness --resume --status --dry-run --max-parallel --json";
+  const flags = "--mode --engagement --instructions --brief --out --proxy --burp --creds --harness --resume --status --dry-run --max-parallel --json";
 
   if (shell === "bash") {
     console.log(`# piranha bash completion — eval "$(piranha completions bash)"
@@ -731,6 +769,10 @@ ${color("bold", "HUNT OPTIONS")}
   --mode <m>           bounty (default) | pentest | comprehensive
   --engagement <type>  Override target classification (web, api, llm, android, network, ...)
   --creds <ref>        Credential reference (e.g. vault:<name>)
+  --instructions <txt> Free-form operator instructions, forwarded verbatim to the swarm (override defaults)
+  --brief <file>       Read operator instructions from a file (also: trailing words after the target)
+  --out <dir>          Write recon artifacts/reports under <dir> (e.g. --out .)
+  --proxy <url>        Route all traffic through a proxy   (--burp = http://127.0.0.1:8080)
   --harness <h>        Force a harness: omp | pi | claude (default: auto-detect)
   --resume             Resume an existing session for this target
   --status             Show status instead of launching
@@ -743,6 +785,7 @@ ${color("bold", "EXAMPLES")}
   piranha hunt https://app.example.com --mode pentest
   piranha plan 10.0.0.0/24
   piranha hunt app.apk --dry-run
+  piranha hunt https://app.example.com --engagement llm --burp --out . --brief brief.md
   piranha tools android
 
 ${color("dim", "Authorized testing only. Configure scope before hunting.")}`);
