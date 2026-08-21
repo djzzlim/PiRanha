@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-  <code>curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh</code>
+  <code>curl -fsSL https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.sh | sh</code>
   <br/>
-  <sub>or as a Pi package — <code>pi install git:github.com/h4ckologic/PiRanha</code></sub>
+  <sub>or as a Pi package — <code>pi install git:github.com/djzzlim/PiRanha</code></sub>
 </p>
 
 <p align="center">
@@ -79,16 +79,16 @@ PiRanha ships as a single self-contained `piranha` binary — like [omp](https:/
 
 ```sh
 # macOS · Linux
-curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.sh | sh
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.ps1 | iex
 
 # Already have bun? Install from source instead of the prebuilt binary
-curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh -s -- --source
+curl -fsSL https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.sh | sh -s -- --source
 
 # Pin a release tag / commit / branch
-curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh -s -- --ref v2.0.0
+curl -fsSL https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.sh | sh -s -- --ref v2.0.0
 ```
 
 The installer drops a self-contained `piranha` into `~/.local/bin` — either the prebuilt release binary, or compiled on the spot from source with bun (`bun build --compile`). Then wire the swarm into your harness and hunt:
@@ -151,13 +151,13 @@ PiRanha is a [Pi](https://pi.dev) package. The repo ships a `pi` manifest in `pa
 
 ```bash
 # Install from GitHub (a pinned tag/commit ref is recommended for reproducibility)
-pi install git:github.com/h4ckologic/PiRanha
+pi install git:github.com/djzzlim/PiRanha
 
 # Try it for a single session, without installing
-pi -e git:github.com/h4ckologic/PiRanha
+pi -e git:github.com/djzzlim/PiRanha
 
 # Project-scoped install (writes .pi/settings.json — shareable with your team)
-pi install -l git:github.com/h4ckologic/PiRanha
+pi install -l git:github.com/djzzlim/PiRanha
 
 # Then, inside pi:
 /skill:piranha hunt https://app.example.com
@@ -309,7 +309,7 @@ flowchart TB
 The fastest path — install the binary, then hunt:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.sh | sh
 piranha install
 piranha hunt https://app.example.com
 ```
@@ -317,7 +317,7 @@ piranha hunt https://app.example.com
 Or clone and install from source (Claude Code):
 
 ```bash
-git clone https://github.com/h4ckologic/PiRanha.git
+git clone https://github.com/djzzlim/PiRanha.git
 cd PiRanha
 ./install.sh
 ```

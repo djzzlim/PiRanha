@@ -1,5 +1,5 @@
 # PiRanha installer (Windows) — installs the `piranha` launcher binary.
-# Usage: irm https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.ps1 | iex
 #
 # Params:
 #   -Source        Install from source via bun (installs bun if needed)
@@ -14,7 +14,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$Repo = if ($env:PIRANHA_REPO) { $env:PIRANHA_REPO } else { "h4ckologic/PiRanha" }
+$Repo = if ($env:PIRANHA_REPO) { $env:PIRANHA_REPO } else { "djzzlim/PiRanha" }
 $InstallDir = if ($env:PIRANHA_INSTALL_DIR) { $env:PIRANHA_INSTALL_DIR } else { Join-Path $HOME ".local\bin" }
 $MinBun = "1.3.14"
 

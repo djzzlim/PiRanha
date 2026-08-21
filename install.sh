@@ -2,7 +2,7 @@
 set -e
 
 # PiRanha installer — installs the `piranha` launcher binary.
-# Usage: curl -fsSL https://raw.githubusercontent.com/h4ckologic/PiRanha/main/install.sh | sh
+# Usage: curl -fsSL https://raw.githubusercontent.com/djzzlim/PiRanha/main/install.sh | sh
 #
 # Options:
 #   --source       Build from source via bun (installs bun if needed)
@@ -13,7 +13,7 @@ set -e
 # After install, run `piranha doctor`, then `piranha install` to register the
 # swarm skill with your harness (omp / pi or Claude Code).
 
-REPO="${PIRANHA_REPO:-h4ckologic/PiRanha}"
+REPO="${PIRANHA_REPO:-djzzlim/PiRanha}"
 INSTALL_DIR="${PIRANHA_INSTALL_DIR:-$HOME/.local/bin}"
 MIN_BUN_VERSION="1.3.14"
 
