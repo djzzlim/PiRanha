@@ -71,27 +71,36 @@ function Install-Binary {
         default { throw "Unsupported architecture: $arch (use -Source)" }
     }
     # Only x64 binaries are published for Windows; arm64 falls back to source.
-    if ($a -ne "x64") { Write-Host "No prebuilt Windows $a binary; use -Source."; throw "unsupported" }
+    if ($a -ne "x64") {
+        Write-Host "No prebuilt Windows $a binary. Falling back to source installation..." -ForegroundColor Yellow
+        Install-ViaBun
+        return
+    }
 
     $headers = @{ "User-Agent" = "piranha-cli" }
-    if ($Ref -ne "") {
-        $rel = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$Repo/releases/tags/$Ref"
-    } else {
-        $rel = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$Repo/releases/latest"
-    }
-    $tag = $rel.tag_name
-    if (-not $tag) { throw "Failed to fetch release tag." }
-    Write-Host "Using version: $tag"
+    try {
+        if ($Ref -ne "") {
+            $rel = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$Repo/releases/tags/$Ref"
+        } else {
+            $rel = Invoke-RestMethod -Headers $headers "https://api.github.com/repos/$Repo/releases/latest"
+        }
+        $tag = $rel.tag_name
+        if (-not $tag) { throw "Failed to fetch release tag." }
+        Write-Host "Using version: $tag"
 
-    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-    $url = "https://github.com/$Repo/releases/download/$tag/piranha-windows-x64.exe"
-    $dest = Join-Path $InstallDir "piranha.exe"
-    Write-Host "Downloading piranha-windows-x64.exe..."
-    Invoke-WebRequest -Uri $url -OutFile $dest
-    Write-Host "`nInstalled piranha to $dest" -ForegroundColor Green
+        New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+        $url = "https://github.com/$Repo/releases/download/$tag/piranha-windows-x64.exe"
+        $dest = Join-Path $InstallDir "piranha.exe"
+        Write-Host "Downloading piranha-windows-x64.exe..."
+        Invoke-WebRequest -Uri $url -OutFile $dest
+        Write-Host "`nInstalled piranha to $dest" -ForegroundColor Green
 
-    if ($env:PATH -notlike "*$InstallDir*") {
-        Write-Host "Add $InstallDir to your PATH." -ForegroundColor Yellow
+        if ($env:PATH -notlike "*$InstallDir*") {
+            Write-Host "Add $InstallDir to your PATH." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "No prebuilt release binary found on GitHub ($Repo). Falling back to source build via Bun..." -ForegroundColor Yellow
+        Install-ViaBun
     }
 }
 

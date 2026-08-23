@@ -145,22 +145,35 @@ install_binary() {
     esac
 
     BINARY="piranha-${PLATFORM}-${ARCH}"
+    RELEASE_JSON=""
     if [ -n "$REF" ]; then
         echo "Fetching release $REF..."
-        RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/tags/${REF}") || {
-            echo "Release tag not found: $REF (for a branch/commit, use --source --ref)"; exit 1; }
+        RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/tags/${REF}" 2>/dev/null || true)
     else
         echo "Fetching latest release..."
-        RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")
+        RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null || true)
     fi
-    LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-    [ -z "$LATEST" ] && { echo "Failed to fetch release tag"; exit 1; }
+
+    LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' || true)
+    if [ -z "$LATEST" ]; then
+        echo "No release binary found on GitHub (${REPO}). Falling back to building from source..."
+        has_bun || install_bun
+        require_bun_version
+        install_from_source
+        return 0
+    fi
     echo "Using version: $LATEST"
 
     mkdir -p "$INSTALL_DIR"
     BINARY_URL="https://github.com/${REPO}/releases/download/${LATEST}/${BINARY}"
     echo "Downloading ${BINARY}..."
-    curl -fsSL "$BINARY_URL" -o "${INSTALL_DIR}/piranha"
+    if ! curl -fsSL "$BINARY_URL" -o "${INSTALL_DIR}/piranha" 2>/dev/null; then
+        echo "Failed to download binary from ${BINARY_URL}. Falling back to building from source..."
+        has_bun || install_bun
+        require_bun_version
+        install_from_source
+        return 0
+    fi
     chmod +x "${INSTALL_DIR}/piranha"
     printf "\n${GREEN}✓ Installed piranha to ${INSTALL_DIR}/piranha${NC}\n"
 
