@@ -33,9 +33,22 @@ import { existsSync, mkdirSync, cpSync } from "fs";
 import { homedir, tmpdir, userInfo } from "os";
 import { join, resolve } from "path";
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+// Ensure ~/.bun/bin and ~/.local/bin are in process.env.PATH for piranha and sub-processes
+(() => {
+  const isWin = process.platform === "win32";
+  const pathSep = isWin ? ";" : ":";
+  const home = homedir();
+  const bunBin = join(home, ".bun", "bin");
+  const localBin = join(home, ".local", "bin");
+  let p = process.env.PATH || "";
+  if (existsSync(bunBin) && !p.includes(bunBin)) {
+    p = `${bunBin}${pathSep}${p}`;
+  }
+  if (existsSync(localBin) && !p.includes(localBin)) {
+    p = `${localBin}${pathSep}${p}`;
+  }
+  process.env.PATH = p;
+})();
 
 const VERSION = typeof pkg.version === "string" ? pkg.version : "0.0.0";
 const REPO = process.env.PIRANHA_REPO ?? "djzzlim/PiRanha";
