@@ -144,6 +144,9 @@ install_binary() {
         *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
     esac
 
+    # Ensure bun is installed on system so harnesses (omp/pi) can install skills
+    has_bun || install_bun || true
+
     BINARY="piranha-${PLATFORM}-${ARCH}"
     RELEASE_JSON=""
     if [ -n "$REF" ]; then

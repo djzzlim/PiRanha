@@ -77,6 +77,12 @@ function Install-Binary {
         return
     }
 
+    if (-not (Have-Cmd "bun")) {
+        Write-Host "Installing bun..."
+        try { irm https://bun.sh/install.ps1 | iex } catch {}
+        $env:PATH = "$HOME\.bun\bin;$env:PATH"
+    }
+
     $headers = @{ "User-Agent" = "piranha-cli" }
     try {
         if ($Ref -ne "") {

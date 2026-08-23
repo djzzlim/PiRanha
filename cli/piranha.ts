@@ -444,14 +444,47 @@ function cmdEngagements(): number {
   return 0;
 }
 
+function ensureBunOnPath(): boolean {
+  if (Bun.which("bun")) return true;
+  const isWin = process.platform === "win32";
+  const bunBinDir = join(homedir(), ".bun", "bin");
+  const bunExe = join(bunBinDir, isWin ? "bun.exe" : "bun");
+
+  if (existsSync(bunExe)) {
+    process.env.PATH = `${bunBinDir}${isWin ? ";" : ":"}${process.env.PATH}`;
+    return true;
+  }
+
+  console.log(color("yellow", "Bun is required by coding harness (omp/pi) to install packages. Installing Bun..."));
+  try {
+    if (isWin) {
+      Bun.spawnSync(["powershell", "-Command", "irm https://bun.sh/install.ps1 | iex"], { stdout: "inherit", stderr: "inherit" });
+    } else {
+      Bun.spawnSync(["sh", "-c", "curl -fsSL https://bun.sh/install | bash"], { stdout: "inherit", stderr: "inherit" });
+    }
+    if (existsSync(bunExe)) {
+      process.env.PATH = `${bunBinDir}${isWin ? ";" : ":"}${process.env.PATH}`;
+      return true;
+    }
+  } catch (err) {
+    console.error(color("red", `Failed to auto-install Bun: ${err}`));
+  }
+  return false;
+}
+
 function installSkill(harnessKind: HarnessKind): void {
   if (harnessKind === "pi" || harnessKind === "omp") {
+    ensureBunOnPath();
     const bin = Bun.which(harnessKind);
     if (!bin) throw new Error(`${harnessKind} not found on PATH.`);
     const ref = process.env.PIRANHA_REF;
     const spec = ref ? `git:github.com/${REPO}#${ref}` : `git:github.com/${REPO}`;
     console.log(color("dim", `  ${harnessKind} install ${spec}`));
-    const p = Bun.spawnSync([bin, "install", spec], { stdout: "inherit", stderr: "inherit" });
+    const p = Bun.spawnSync([bin, "install", spec], {
+      stdout: "inherit",
+      stderr: "inherit",
+      env: process.env,
+    });
     if (p.exitCode !== 0) throw new Error(`${harnessKind} install failed.`);
     return;
   }
