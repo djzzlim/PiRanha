@@ -32,7 +32,7 @@ TypeScript tools go in `skills/BugBountyFramework/Tools/`. Requirements:
 ## Development Setup
 
 ```bash
-git clone https://github.com/h4ckologic/PiRanha.git
+git clone https://github.com/djzzlim/PiRanha.git
 cd PiRanha
 ./install.sh
 ```

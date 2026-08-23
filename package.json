@@ -27,13 +27,13 @@
     "build:windows-x64": "bun build ./cli/piranha.ts --compile --target=bun-windows-x64 --outfile dist/piranha-windows-x64.exe",
     "build:all": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64"
   },
-  "homepage": "https://github.com/h4ckologic/PiRanha#readme",
+  "homepage": "https://github.com/djzzlim/PiRanha#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/h4ckologic/PiRanha.git"
+    "url": "git+https://github.com/djzzlim/PiRanha.git"
   },
   "bugs": {
-    "url": "https://github.com/h4ckologic/PiRanha/issues"
+    "url": "https://github.com/djzzlim/PiRanha/issues"
   },
   "pi": {
     "skills": [

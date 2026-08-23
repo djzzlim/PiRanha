@@ -51,5 +51,5 @@
   <text x="540" y="205" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="116" font-weight="800" fill="#eafdff" letter-spacing="-2">Pi<tspan fill="#10e0cf">Ranha</tspan></text>
   <text x="546" y="250" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="7" fill="#7fb6c2">AUTONOMOUS BUG-HUNTING SWARM</text>
   <text x="546" y="298" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="17" fill="#5f8a96">53 specialized AI agents &#183; web &#183; api &#183; llm &#183; cloud &#183; mobile &#183; binary &#183; network</text>
-  <text x="546" y="356" font-family="'SFMono-Regular', Consolas, monospace" font-size="16" fill="#10e0cf">$ pi install git:github.com/h4ckologic/PiRanha</text>
+  <text x="546" y="356" font-family="'SFMono-Regular', Consolas, monospace" font-size="16" fill="#10e0cf">$ pi install git:github.com/djzzlim/PiRanha</text>
 </svg>

@@ -38,7 +38,7 @@ import { join, resolve } from "path";
 // ---------------------------------------------------------------------------
 
 const VERSION = typeof pkg.version === "string" ? pkg.version : "0.0.0";
-const REPO = process.env.PIRANHA_REPO ?? "h4ckologic/PiRanha";
+const REPO = process.env.PIRANHA_REPO ?? "djzzlim/PiRanha";
 const REPO_URL = `https://github.com/${REPO}`;
 const RAW_INSTALL = `https://raw.githubusercontent.com/${REPO}/main/install.sh`;
 const CLAUDE_DIR = join(homedir(), ".claude");

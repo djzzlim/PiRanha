@@ -314,7 +314,7 @@ Ensure `settings.json` has:
 
 ```bash
 # Clone the BugHunter AI repo
-git clone https://github.com/h4ckologic/PiRanha.git
+git clone https://github.com/djzzlim/PiRanha.git
 cd PiRanha
 
 # Run the installer

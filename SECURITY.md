@@ -23,7 +23,7 @@ If you find a security issue in PiRanha itself (the agents, tools, or installer 
 command-injection in a helper script, an unsafe deserialization, or a credential leak):
 
 1. **Do not** open a public issue.
-2. Use **GitHub → Security → [Report a vulnerability](https://github.com/h4ckologic/PiRanha/security/advisories/new)**
+2. Use **GitHub → Security → [Report a vulnerability](https://github.com/djzzlim/PiRanha/security/advisories/new)**
    (private advisory), or open a minimal private channel with the maintainer.
 3. Include a clear description, affected version/commit, reproduction steps, and impact.
 
@@ -33,7 +33,7 @@ the severity warrants. Coordinated disclosure is appreciated; we will credit rep
 ## Supported versions
 
 PiRanha is distributed from `main` and as Pi package releases. Security fixes land on `main`
-first. Pin a tag/commit (`pi install git:github.com/h4ckologic/PiRanha@<ref>`) for reproducible
+first. Pin a tag/commit (`pi install git:github.com/djzzlim/PiRanha@<ref>`) for reproducible
 deployments and update regularly.
 
 ## Handling of secrets
