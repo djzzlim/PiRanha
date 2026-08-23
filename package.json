@@ -1,6 +1,6 @@
 {
   "name": "piranha",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "PiRanha — an autonomous bug-bounty swarm for Pi: 53 specialized security agents and a deterministic engagement router that classify a target and dispatch the right hunters in parallel across web, API, LLM/agentic, mobile, binary/firmware, cloud (AWS/Azure/GCP/k8s), and network/AD.",
   "keywords": [
     "pi-package",

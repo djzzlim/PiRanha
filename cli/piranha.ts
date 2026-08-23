@@ -702,9 +702,21 @@ function cmdDoctor(): number {
   }
 
   console.log(color("bold", "\nSkill install:"));
-  const skillOk = existsSync(join(SKILL_DEST, "SKILL.md"));
-  console.log(`  ${mark(skillOk)}Claude Code skill (${SKILL_DEST})`);
-  if (!skillOk) console.log(color("dim", "       run `piranha install` to set it up"));
+  const ompSkill = existsSync(join(homedir(), ".omp", "agent", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".omp", "skills", "piranha", "SKILL.md"));
+  const piSkill = existsSync(join(homedir(), ".pi", "agent", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".pi", "skills", "piranha", "SKILL.md"));
+  const claudeSkill = existsSync(join(SKILL_DEST, "SKILL.md"));
+  const anySkill = ompSkill || piSkill || claudeSkill;
+
+  if (checkTool("omp")) {
+    console.log(`  ${mark(ompSkill)}omp skill (~/.omp/agent/skills/piranha)`);
+  }
+  if (checkTool("pi")) {
+    console.log(`  ${mark(piSkill)}pi skill (~/.pi/agent/skills/piranha)`);
+  }
+  if (checkTool("claude")) {
+    console.log(`  ${mark(claudeSkill)}Claude Code skill (${SKILL_DEST})`);
+  }
+  if (!anySkill) console.log(color("dim", "       run `piranha install` to set it up"));
 
   console.log(color("bold", "\nOptional offensive tooling:"));
   for (const t of ["subfinder", "httpx", "nuclei", "ffuf", "sqlmap", "op", "burpsuite"]) {
