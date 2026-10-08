@@ -118,10 +118,17 @@ switch ($mode) {
     }
 }
 
-Write-Host ""
-Write-Host "Next steps:"
+Write-Host "`nInstalling swarm skills..." -ForegroundColor Cyan
+if (Have-Cmd "piranha") {
+    try { piranha install } catch {}
+} elseif (Test-Path (Join-Path $InstallDir "piranha.exe")) {
+    try { & (Join-Path $InstallDir "piranha.exe") install } catch {}
+} else {
+    Write-Host "  2. piranha install"
+}
+
+Write-Host "`nNext steps:"
 Write-Host "  1. piranha doctor"
-Write-Host "  2. piranha install"
-Write-Host "  3. piranha hunt https://your-target.com"
+Write-Host "  2. piranha hunt https://your-target.com"
 Write-Host ""
 Write-Host "Authorized testing only. Configure scope before hunting." -ForegroundColor Red
