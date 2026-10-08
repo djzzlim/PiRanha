@@ -9,7 +9,7 @@ set -e
 #   --binary       Always install the prebuilt binary
 #   --ref <ref>    Install a specific tag/commit/branch
 #   -r <ref>       Shorthand for --ref
-#
+
 # After install, run `piranha doctor`, then `piranha install` to register the
 # swarm skill with your harness (omp / pi or Claude Code).
 
@@ -202,16 +202,8 @@ case "$MODE" in
         ;;
 esac
 
-printf "\n${BOLD}Installing swarm skills...${NC}\n"
-if command -v piranha >/dev/null 2>&1; then
-    piranha install || true
-elif [ -f "$INSTALL_DIR/piranha" ]; then
-    "$INSTALL_DIR/piranha" install || true
-else
-    printf "  ${CYAN}2.${NC} Register the swarm skill:   ${BOLD}piranha install${NC}\n"
-fi
-
 printf "\n${BOLD}Next steps:${NC}\n"
 printf "  ${CYAN}1.${NC} Verify your environment:   ${BOLD}piranha doctor${NC}\n"
-printf "  ${CYAN}2.${NC} Hunt:                       ${BOLD}piranha hunt https://your-target.com${NC}\n\n"
+printf "  ${CYAN}2.${NC} Register the swarm skill:   ${BOLD}piranha install${NC}\n"
+printf "  ${CYAN}3.${NC} Hunt:                       ${BOLD}piranha hunt https://your-target.com${NC}\n\n"
 printf "${RED}${BOLD}Authorized testing only.${NC} Configure scope before hunting.\n\n"

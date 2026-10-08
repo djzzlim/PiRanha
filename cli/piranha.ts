@@ -485,63 +485,79 @@ function ensureBunOnPath(): boolean {
   return false;
 }
 
-function installSkill(harnessKind: HarnessKind): void {
-  if (harnessKind === "pi" || harnessKind === "omp") {
-    ensureBunOnPath();
-    const bin = Bun.which(harnessKind);
-    if (!bin) throw new Error(`${harnessKind} not found on PATH.`);
-    const ref = process.env.PIRANHA_REF;
-    const spec = ref ? `git:github.com/${REPO}#${ref}` : `git:github.com/${REPO}`;
-    console.log(color("dim", `  ${harnessKind} install ${spec}`));
-    const p = Bun.spawnSync([bin, "install", spec], {
-      stdout: "inherit",
-      stderr: "inherit",
-      env: process.env,
-    });
-    if (p.exitCode !== 0) {
-      console.log(color("yellow", `  [!] ${harnessKind} install command failed. Falling back to manual copy...`));
-    }
-    
-    // Verify if it actually worked (namespace collisions with Oh My Posh cause silent failures)
-    const expectedDest = join(homedir(), `.${harnessKind}`, "agent", "skills", "piranha");
-    const expectedDestLegacy = join(homedir(), `.${harnessKind}`, "skills", "piranha");
-    const expectedDestUpper = join(homedir(), `.${harnessKind}`, "agent", "skills", "PiRanha");
-    
-    if (!existsSync(join(expectedDest, "SKILL.md")) && 
-        !existsSync(join(expectedDestLegacy, "SKILL.md")) &&
-        !existsSync(join(expectedDestUpper, "SKILL.md"))) {
+function installSkills(preferred?: string): void {
+  const knownHarnesses = ["omp", "pi", "claude", "deepseek", "codex", "cursor", "windsurf", "agy", "cline", "roo", "copilot"];
+  let src: string | null = null;
+  let installedCount = 0;
+
+  for (const h of knownHarnesses) {
+    if (preferred && preferred !== h) continue;
+
+    const hasBin = Bun.which(h) !== null;
+    const dotDir = join(homedir(), `.${h}`);
+    const hasDir = existsSync(dotDir);
+
+    if (hasBin || hasDir || preferred === h) {
+      if (!src) src = findSkillSource() ?? cloneSkill();
+      console.log(color("cyan", `Installing PiRanha skill for ${h}...`));
       
-      console.log(color("yellow", `  [!] Skill not found after running '${harnessKind} install'. Falling back to manual install...`));
-      
-      const src = findSkillSource() ?? cloneSkill();
-      mkdirSync(expectedDest, { recursive: true });
-      cpSync(src, expectedDest, { recursive: true });
-      console.log(color("green", `  [ok] skill manually installed → ${expectedDest}`));
-    } else {
-      console.log(color("green", `  [ok] skill installed via ${harnessKind}`));
+      try {
+        if (h === "omp" || h === "pi") {
+          let nativeWorked = false;
+          if (hasBin) {
+            ensureBunOnPath();
+            const ref = process.env.PIRANHA_REF;
+            const spec = ref ? `git:github.com/${REPO}#${ref}` : `git:github.com/${REPO}`;
+            console.log(color("dim", `  ${h} install ${spec}`));
+            const p = Bun.spawnSync([Bun.which(h)!, "install", spec], { stdout: "inherit", stderr: "inherit", env: process.env });
+            if (p.exitCode !== 0) {
+              console.log(color("yellow", `  [!] ${h} install command failed. Falling back to manual copy...`));
+            }
+          }
+          
+          const expectedDest = join(dotDir, "agent", "skills", "piranha");
+          const expectedDestLegacy = join(dotDir, "skills", "piranha");
+          const expectedDestUpper = join(dotDir, "agent", "skills", "PiRanha");
+          
+          if (!existsSync(join(expectedDest, "SKILL.md")) && !existsSync(join(expectedDestLegacy, "SKILL.md")) && !existsSync(join(expectedDestUpper, "SKILL.md"))) {
+            if (hasBin) console.log(color("yellow", `  [!] Skill not found after native install attempt. Falling back to manual install...`));
+            mkdirSync(expectedDest, { recursive: true });
+            cpSync(src, expectedDest, { recursive: true });
+            try {
+              mkdirSync(expectedDestLegacy, { recursive: true });
+              cpSync(src, expectedDestLegacy, { recursive: true });
+            } catch (e) {}
+            console.log(color("green", `  [ok] skill manually installed → ${expectedDest}`));
+          } else {
+            console.log(color("green", `  [ok] skill installed via ${h}`));
+          }
+        } else {
+          // Standard manual copy for claude, deepseek, codex, etc.
+          const dest = join(dotDir, "skills", "BugBountyFramework");
+          mkdirSync(dest, { recursive: true });
+          cpSync(src, dest, { recursive: true });
+          console.log(color("green", `  [ok] skill manually installed → ${dest}`));
+          if (h === "claude") ensureMemoryDirs();
+        }
+        installedCount++;
+      } catch (err) {
+        console.log(color("red", `  [!] failed to install for ${h}: ${err}`));
+      }
     }
-    return;
   }
-  // claude: copy the skill tree into ~/.claude/skills
-  const src = findSkillSource() ?? cloneSkill();
-  mkdirSync(join(CLAUDE_DIR, "skills"), { recursive: true });
-  cpSync(src, SKILL_DEST, { recursive: true });
-  ensureMemoryDirs();
-  console.log(color("green", `  [ok] skill installed → ${SKILL_DEST}`));
+
+  if (installedCount === 0) {
+    console.log(color("yellow", "No harnesses automatically detected (looked for omp, pi, claude, deepseek, codex, etc)."));
+    console.log(color("dim", "You can force an install by specifying the harness: piranha install --harness deepseek"));
+  }
 }
 
 function cmdInstall(rest: string[]): number {
   const { flags } = parseFlags(rest);
-  const harness = detectHarness(str(flags, "harness"));
-  if (!harness) {
-    die("No harness (omp / pi / claude) found on PATH. Install one first, then re-run `piranha install`.");
-  }
-  console.log(color("cyan", `Installing PiRanha skill for ${harness!.kind}...`));
-  try {
-    installSkill(harness!.kind);
-  } catch (err) {
-    die(err instanceof Error ? err.message : String(err));
-  }
+  const preferred = str(flags, "harness");
+  
+  installSkills(preferred);
+  
   console.log(color("green", "Done. Try: ") + color("bold", "piranha hunt https://your-target.com"));
   return 0;
 }
