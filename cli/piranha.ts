@@ -498,7 +498,28 @@ function installSkill(harnessKind: HarnessKind): void {
       stderr: "inherit",
       env: process.env,
     });
-    if (p.exitCode !== 0) throw new Error(`${harnessKind} install failed.`);
+    if (p.exitCode !== 0) {
+      console.log(color("yellow", `  [!] ${harnessKind} install command failed. Falling back to manual copy...`));
+    }
+    
+    // Verify if it actually worked (namespace collisions with Oh My Posh cause silent failures)
+    const expectedDest = join(homedir(), `.${harnessKind}`, "agent", "skills", "piranha");
+    const expectedDestLegacy = join(homedir(), `.${harnessKind}`, "skills", "piranha");
+    const expectedDestUpper = join(homedir(), `.${harnessKind}`, "agent", "skills", "PiRanha");
+    
+    if (!existsSync(join(expectedDest, "SKILL.md")) && 
+        !existsSync(join(expectedDestLegacy, "SKILL.md")) &&
+        !existsSync(join(expectedDestUpper, "SKILL.md"))) {
+      
+      console.log(color("yellow", `  [!] Skill not found after running '${harnessKind} install'. Falling back to manual install...`));
+      
+      const src = findSkillSource() ?? cloneSkill();
+      mkdirSync(expectedDest, { recursive: true });
+      cpSync(src, expectedDest, { recursive: true });
+      console.log(color("green", `  [ok] skill manually installed → ${expectedDest}`));
+    } else {
+      console.log(color("green", `  [ok] skill installed via ${harnessKind}`));
+    }
     return;
   }
   // claude: copy the skill tree into ~/.claude/skills
@@ -702,8 +723,8 @@ function cmdDoctor(): number {
   }
 
   console.log(color("bold", "\nSkill install:"));
-  const ompSkill = existsSync(join(homedir(), ".omp", "agent", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".omp", "skills", "piranha", "SKILL.md"));
-  const piSkill = existsSync(join(homedir(), ".pi", "agent", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".pi", "skills", "piranha", "SKILL.md"));
+  const ompSkill = existsSync(join(homedir(), ".omp", "agent", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".omp", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".omp", "agent", "skills", "PiRanha", "SKILL.md"));
+  const piSkill = existsSync(join(homedir(), ".pi", "agent", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".pi", "skills", "piranha", "SKILL.md")) || existsSync(join(homedir(), ".pi", "agent", "skills", "PiRanha", "SKILL.md"));
   const claudeSkill = existsSync(join(SKILL_DEST, "SKILL.md"));
   const anySkill = ompSkill || piSkill || claudeSkill;
 
