@@ -29,7 +29,7 @@ import {
   type HuntMode,
 } from "../skills/BugBountyFramework/Tools/hunt-orchestrator.ts";
 import { runCli as vaultCli } from "../skills/BugBountyFramework/Tools/credential-vault.ts";
-import { existsSync, mkdirSync, cpSync } from "fs";
+import { existsSync, mkdirSync, cpSync, rmSync } from "fs";
 import { homedir, tmpdir, userInfo } from "os";
 import { join, resolve } from "path";
 
@@ -596,6 +596,45 @@ async function cmdUpdate(): Promise<number> {
   return p.exitCode ?? 0;
 }
 
+function cmdUninstall(): number {
+  console.log(color("cyan", "Uninstalling PiRanha skills from all harnesses..."));
+  const knownHarnesses = ["omp", "pi", "claude", "deepseek", "codex", "cursor", "windsurf", "agy", "cline", "roo", "copilot"];
+  
+  let removedCount = 0;
+  for (const h of knownHarnesses) {
+    const dotDir = join(homedir(), `.${h}`);
+    const dirsToRemove = [
+      join(dotDir, "agent", "skills", "piranha"),
+      join(dotDir, "skills", "piranha"),
+      join(dotDir, "agent", "skills", "PiRanha"),
+      join(dotDir, "skills", "BugBountyFramework")
+    ];
+    
+    for (const d of dirsToRemove) {
+      if (existsSync(d)) {
+        try {
+          rmSync(d, { recursive: true, force: true });
+          console.log(color("dim", `  removed ${d}`));
+          removedCount++;
+        } catch (err) {
+          console.log(color("red", `  failed to remove ${d}: ${err}`));
+        }
+      }
+    }
+  }
+
+  if (removedCount === 0) {
+    console.log(color("yellow", "No installed skills found."));
+  } else {
+    console.log(color("green", `Successfully removed ${removedCount} skill directories.`));
+  }
+
+  console.log("");
+  console.log(color("dim", "Note: Session data and logs in ~/.claude/MEMORY/BugBounty were kept intact."));
+  console.log(color("dim", `To completely remove PiRanha, delete the binary: ${process.argv[0]}`));
+  return 0;
+}
+
 function checkTool(name: string): boolean {
   return Bun.which(name) !== null;
 }
@@ -866,6 +905,7 @@ ${color("bold", "COMMANDS")}
   tools [type]         List per-domain tooling & MCP, checking your PATH
   vault ...            Credential vault (passthrough: --store/--get/--list/--delete/--redact)
   install              Install the PiRanha skill into your harness
+  uninstall            Remove the PiRanha skills from all harnesses
   update               Update the piranha binary to the latest release
   doctor               Check prerequisites and environment
   completions <shell>  Emit a shell completion script (bash|zsh|fish)
@@ -931,6 +971,8 @@ async function main(): Promise<number> {
       return 0;
     case "install":
       return cmdInstall(rest);
+    case "uninstall":
+      return cmdUninstall();
     case "update":
       return await cmdUpdate();
     case "doctor":
